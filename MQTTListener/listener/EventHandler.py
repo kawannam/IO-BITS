@@ -3,7 +3,7 @@ import paho.mqtt.publish as publish
 
 
 class EventHandler:
-    EVENT_NUM = 10
+    EVENT_NUM = 100
     DATA_FILE = "press_data.p"
     NAMES = ["A", "B", "C", "D"]
     BUTTONS = ["A", "B"]
