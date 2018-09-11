@@ -1,4 +1,4 @@
-  int space_for_titles = 15;
+  //int space_for_titles = 15;
   
   int s_height = DISPLAY_HEIGHT - space_for_titles;
   int s_width = DISPLAY_WIDTH - space_for_titles;
@@ -20,13 +20,13 @@ void draw_time_interval(tm* start_time, tm* end_time) {
   } else {
     display.fillRect( x, y, (s_width)/7 - 1, s_height - y, GxEPD_RED);
     int d_day = start_time->tm_wday + 1;
-    while (d_day != end_time->tm_wday) {
+    while (d_day < end_time->tm_wday) {
       display.fillRect( ((d_day*s_width)/7) + space_for_titles, space_for_titles, (s_width)/7 - 1, s_height, GxEPD_RED);
       d_day++;
     }
     int height = (end_time->tm_hour* s_height)/24 + space_for_titles;
     int x2 = (end_time->tm_wday * s_width)/7 + space_for_titles + 1;
-    display.fillRect( x2, space_for_titles-2, (s_width)/7, height, GxEPD_RED);
+    display.fillRect( x2, space_for_titles+2, (s_width)/7, height, GxEPD_RED);
   }
 }
 
@@ -52,6 +52,7 @@ void stacked_bars() {
   for( int i = 0; i < 7; i++) {
     spot = stacked_bar_get_spot(0, i);
     display.setCursor( spot.x - 2, 0);
+
     display.println(days[i]);
     display.drawLine(((i*s_width)/7) + space_for_titles, space_for_titles, ((i*s_width)/7) + space_for_titles, DISPLAY_HEIGHT, GxEPD_BLACK);
   }
@@ -60,7 +61,7 @@ void stacked_bars() {
   time_t now = time(nullptr);
   struct tm* now_tm = localtime(&now);
 
-  for(int i = 0; i < 99; i = i +2) {
+  for(int i = 0; i < MAX_NUMBER_OF_DATA_POINTS - 1; i = i +2) {
     struct tm start_time;
     struct tm end_time;
     char s_time[30];
@@ -90,7 +91,7 @@ void stacked_bars() {
   }
 
     spot = dotted_week_get_spot(now_tm->tm_hour, now_tm->tm_wday);
-  int x = (now_tm->tm_wday * (s_width/7)) + (s_width/14) + space_for_titles + 1;
+  int x = (now_tm->tm_wday * (s_width/7)) + (s_width/14) + space_for_titles - 1;
   int y = (now_tm->tm_hour * (s_height/24)) + (s_height/48) + space_for_titles + 3;
 
   if (((count_A + count_B) % 2) == 0) {

@@ -4,6 +4,7 @@ void tug_of_war() {
       display.setFont(f9);
       display.setRotation(1);
 
+
     if (count_A == 0 && count_B == 0) {
       display.fillScreen(GxEPD_WHITE);
       display.setCursor(70, 70);

@@ -34,7 +34,6 @@ void plain_text_single_input_display(int count, String timestamp) {
 
   
   display.setTextColor(GxEPD_WHITE);
-  count = 9999;
   display.setCursor(20, 130);
   display.println(timestamp);
 

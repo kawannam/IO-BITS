@@ -1,6 +1,7 @@
 import pickle
 import paho.mqtt.publish as publish
-
+import os, sys
+import datetime
 
 class EventHandler:
     EVENT_NUM = 100
@@ -62,3 +63,31 @@ class EventHandler:
             if len(pts) > 0:
                 publish.multiple(pts, hostname=server)
             print("Done responding to data request.")
+
+    def undo_request_event(self, message):
+        fields = message.split(",")
+        with open("{}.csv".format(fields[0]), "r+") as file:
+            lines = file.readlines()
+            last_line = lines[-1].split(",")
+            lines = lines[:-1]
+            file.writelines([item for item in lines])
+            
+            self.press_data[fields[0]][last_line[0]] -= 1
+            with open(EventHandler.DATA_FILE, "wb") as file:
+                pickle.dump(self.press_data, file)
+                        
+    def newfile_request_event(self, message):
+        fields = message.split(",")
+        ts = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        os.rename("{}.csv".format(fields[0]), "{}_{}.csv".format(fields[0],ts))
+        try:
+            file = open("{}.csv".format(fields[0]), "x")
+            file.close()
+        except FileExistsError:
+            print("File was not restarted correctly")
+        for button in self.BUTTONS:
+            self.press_data[fields[0]][button] = 0
+        with open(EventHandler.DATA_FILE, "wb") as file:
+            pickle.dump(self.press_data, file)
+                        
+    
