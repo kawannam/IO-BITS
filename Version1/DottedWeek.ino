@@ -1,7 +1,7 @@
 #define HOURS_IN_A_DAY 24
 #define DAYS_IN_A_WEEK 7
 #define DAYS_IN_A_YEAR 365
-const int space_for_titles = DISPLAY_HEIGHT * 0.10;
+const int space_for_titles = 15;
 const int d_height = DISPLAY_HEIGHT - space_for_titles;
 const int d_width = DISPLAY_WIDTH - space_for_titles;
 const int dot_size = (d_height + 1)/24;
@@ -21,9 +21,9 @@ void dotted_week() {
   coord spot;
   time_t now = time(nullptr);
   struct tm* now_tm = localtime(&now);
-  time_t the_time;
+  //time_t the_time;
   struct tm* p_tm;
-  char char_time[100];
+  //char char_time[100];
 
   spot = dotted_week_get_spot(now_tm->tm_hour, now_tm->tm_wday);
   display.drawRect(spot.x - (dot_size/2), spot.y - (dot_size/2), dot_size, dot_size, GxEPD_BLACK);
@@ -32,13 +32,14 @@ void dotted_week() {
     if(points[i].time_stamp == NULL) {
       continue;
     }
-    (points[i].time_stamp).toCharArray(char_time, 30);
-    strptime(char_time, "%Y-%m-%d %H:%M:%S", p_tm);
-    the_time = mktime(p_tm);  // t is now your desired time_t
-    //the_time = tsfstr(points[i].time_stamp);
-    p_tm = localtime(&the_time);
+    //(points[i].time_stamp).toCharArray(char_time, 30);
+    //strptime(char_time, "%Y-%m-%d %H:%M:%S", p_tm);
+    //the_time = mktime(p_tm);  // t is now your desired time_t
+
+    //p_tm = localtime(&the_time);
+    p_tm = points[i].time_stamp;
     //Need to handle year roll over
-    if (now_tm->tm_wday >= (now_tm->tm_yday - p_tm->tm_yday) + (365*(now_tm->tm_year - p_tm->tm_year))) {
+    if (now_tm->tm_wday >= (now_tm->tm_yday - p_tm->tm_yday) + (DAYS_IN_A_YEAR*(now_tm->tm_year - p_tm->tm_year))) {
       spot = dotted_week_get_spot(p_tm->tm_hour, now_tm->tm_wday);
       if (points[i].button == 'A') {
         display.fillCircle(spot.x, spot.y, (dot_size/2), GxEPD_BLACK); //button is A -> colour black

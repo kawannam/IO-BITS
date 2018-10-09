@@ -70,11 +70,13 @@ void stacked_bars() {
     int j = i + 1;
 
     if ( points[i].time_stamp != NULL ) {
-    (points[i].time_stamp).toCharArray(s_time, 30);
-    strptime(s_time, "%Y-%m-%d %H:%M:%S", &start_time);
+    //(points[i].time_stamp).toCharArray(s_time, 30);
+    //strptime(s_time, "%Y-%m-%d %H:%M:%S", &start_time);
+    start_time = *points[i].time_stamp;
     if (points[j].time_stamp != NULL ) {
-    (points[j].time_stamp).toCharArray(e_time, 30);
-    strptime(e_time, "%Y-%m-%d %H:%M:%S", &end_time);
+    //(points[j].time_stamp).toCharArray(e_time, 30);
+    //strptime(e_time, "%Y-%m-%d %H:%M:%S", &end_time);
+    end_time = *points[i].time_stamp;
     } else {
       end_time = *now_tm;
     }
@@ -101,8 +103,6 @@ void stacked_bars() {
     display.drawRect(x, y, 7, 7, GxEPD_BLACK);
   }
    display.update();
-   //Put the chip to sleep. 
-   ESP.deepSleep(6e7); // 20e6 is 20 microseconds
 }
 
 

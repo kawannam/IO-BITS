@@ -39,8 +39,5 @@ void tug_of_war() {
   
       Serial.println("Drawing Done");
     }
-  
-    //Put the chip to sleep. 
-    ESP.deepSleep(6e7); // 20e6 is 20 microseconds
     
 }

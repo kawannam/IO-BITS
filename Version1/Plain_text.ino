@@ -9,16 +9,16 @@ void plain_text() {
     plain_text_two_input_display();
   }
   display.update();
-  ESP.deepSleep(6e7); // 20e6 is 20 microseconds
-
 }
 
 String get_last_instance_timestamp(char button) {
+   char buff[30];
   for (int i = 0; i < 10; i++) {
     Serial.print(button);
     Serial.println(points[i].button);
     if (points[i].button == button) {
-      return points[i].time_stamp;
+    strftime(buff, 30, "%H:%M:%S %d/%m/%y", points[i].time_stamp);
+      return buff;
     }
   }
   return "";
@@ -34,7 +34,8 @@ void plain_text_single_input_display(int count, String timestamp) {
 
   
   display.setTextColor(GxEPD_WHITE);
-  display.setCursor(20, 130);
+  display.setFont(f9b);
+  display.setCursor(5, 125);
   display.println(timestamp);
 
   display.setTextColor(GxEPD_BLACK);
@@ -62,6 +63,7 @@ void plain_text_two_input_display() {
   display.setRotation(1);
   
   display.setTextColor(GxEPD_WHITE);
+  display.setFont(f9b);
   display.setCursor(30, 140);
   display.println(get_last_instance_timestamp('A'));
 

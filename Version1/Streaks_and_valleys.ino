@@ -39,11 +39,10 @@ void streaks_and_valleys() {
   display.setCursor(8, DISPLAY_HEIGHT - 6);
   display.println(dispaly_streak);
   display.update();
-  ESP.deepSleep(6e7); // 20e6 is 20 microseconds
 }
 
 int get_streak() {
-  struct tm point_time;
+  struct tm* point_time;
   char p_time[30];
   bool days[MAX_NUMBER_OF_DATA_POINTS];
   for (int i = 0; i < MAX_NUMBER_OF_DATA_POINTS; i++) {
@@ -56,9 +55,10 @@ int get_streak() {
   int index;
   for (int i = 0; i < MAX_NUMBER_OF_DATA_POINTS; i++) {
     if ( points[i].time_stamp != NULL ) {
-      (points[i].time_stamp).toCharArray(p_time, 30);
-      strptime(p_time, "%Y-%m-%d %H:%M:%S", &point_time);
-      index = (now_tm->tm_yday - point_time.tm_yday) + ((now_tm->tm_year - point_time.tm_year)*365);
+      //(points[i].time_stamp).toCharArray(p_time, 30);
+      //strptime(p_time, "%Y-%m-%d %H:%M:%S", &point_time);
+      point_time = points[i].time_stamp;
+      index = (now_tm->tm_yday - point_time->tm_yday) + ((now_tm->tm_year - point_time->tm_year)*365);
       if (index < MAX_NUMBER_OF_DATA_POINTS) {
         days[index] = true;
       }
