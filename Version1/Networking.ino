@@ -18,14 +18,10 @@ void message_callback(char* topic, byte* payload, unsigned int length) {
   }
 }
 
-
 // The int handler will just signal that the int has happen
 // we will do the work from the main loop.
 void awaken_callback(){
   Serial.println("awaken call_back");
-  awakenByInterrupt=true;
-}
-void handleInterrupt(){ 
   if (awake == false)  {
     wakeup();
   }
@@ -35,10 +31,8 @@ void handleInterrupt(){
 
 void sleep() {
   Serial.println("Going to sleep");
-  awakenByInterrupt=false;
-  
-  //gpio_pin_wakeup_enable(GPIO_ID_PIN(MCP_CONNECTION_2), GPIO_PIN_INTR_HILEVEL);
-  //attachInterrupt(MCP_CONNECTION_2,awaken_callback,FALLING);
+  gpio_pin_wakeup_enable(GPIO_ID_PIN(MCP_CONNECTION_2), GPIO_PIN_INTR_HILEVEL);
+  attachInterrupt(MCP_CONNECTION_2,awaken_callback,FALLING);
   Serial.println("Enabled Wakeup");
   wifi_station_disconnect();
   Serial.println("WifiDisconnected");

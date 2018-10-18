@@ -122,8 +122,6 @@ int wifi_connection_attempts = 0;
 int mqtt_connection_attempts = 0;
 int time_connection_attempts = 0;
 
-volatile boolean awakenByInterrupt = false;
-
 GxIO_Class io(SPI, CHIP_SELECT, DC, RST);
 GxEPD_Class display(io, RST, BUSY);
 
@@ -261,11 +259,6 @@ void setup() {
 }
 
 void loop() {
-  attachInterrupt(MCP_CONNECTION_2,awaken_callback,FALLING);
-  while(!awakenByInterrupt);
-  detachInterrupt(MCP_CONNECTION_2);
-  if(awakenByInterrupt) handleInterrupt();
-  
   if (awake == false)  {
     Serial.println("Loop Initializing wake up");
     awaken_callback();
