@@ -1,25 +1,73 @@
 /*
  * Goal 1: Have 5 buttons wake the esp32 from deepsleep 
  *         upon wakeup have a corresponding led light up
+ *         
+ * Goal 2: Update screen on wakeup
  */
 
 #include <esp_deep_sleep.h>
+#include <GxEPD.h>
+#include <GxIO/GxIO_SPI/GxIO_SPI.h>
+#include <GxIO/GxIO.h>
+
+#include <Fonts/FreeMonoBold9pt7b.h>
+
+//---------------Customization Info----------------//
+#define DISPLAY_TYPE '1.5bwy'
+//------------------------------------------------//
+
+//---------------E-Paper Display Defines----------//
+
+// Configs/Includes based on which screen we are using
+#if DISPLAY_TYPE == '1.5bwy'
+#include <GxGDEW0154Z17/GxGDEW0154Z17.h>
+#define DISPLAY_HEIGHT 152
+#define DISPLAY_WIDTH 152
+const String display_type = "1.5bwy";
+#endif
+#if DISPLAY_TYPE == '1.5bwr'
+#include <GxGDEW0154Z04/GxGDEW0154Z04.h>
+#define DISPLAY_HEIGHT 200
+#define DISPLAY_WIDTH 200
+const String display_type = "1.5bwr";
+#endif
+#if DISPLAY_TYPE == '4.2'
+#include <GxGDEW042Z15/GxGDEW042Z15.h>
+#define DISPLAY_HEIGHT 300
+#define DISPLAY_WIDTH 400
+const String display_type = "4.2";
+#endif
+
+// Pins screen is connected to
+#define BUSY 4
+#define RST 16
+#define DC 17
+#define CS 5
+#define CLK 18
+#define DIN 23
+
+#define CHIP_SELECT 13 // default: 5
+
+// Defining the display variable
+//GxIO_Class io(SPI, CHIP_SELECT, DC, RST);
+//GxEPD_Class display(io, RST, BUSY);
+
+GxIO_Class io(SPI, /*CS=5*/ SS, /*DC=*/ 17, /*RST=*/ 16); // arbitrary selection of 17, 16
+GxEPD_Class display(io, /*RST=*/ 16, /*BUSY=*/ 4); // arbitrary selection of (16), 4
+//------------------------------------------------//
+
+//--------------Pin Defines----------------------//
+
+
 
 #define BUTTON_PIN_BITMASK 0x8F00000000 // pins 32, 33, 34, 35, and 39 will wakeup the chip
-#define PURPLE 23
-#define BLUE 22
-#define GREEN 21
-#define ORANGE 18
-#define YELLOW 19
+//------------------------------------------------//
 
 void print_wakeup_reason() {
   esp_deep_sleep_wakeup_cause_t wakeup_reason;
 
   wakeup_reason = esp_deep_sleep_get_wakeup_cause();
-  
-  Serial.println("");
-  Serial.println("");
-  Serial.println("EXT1 Test");
+  Serial.println("\nEXT1 Test");
   switch (wakeup_reason)
   {
     case 1  : Serial.println("Wakeup caused by external signal using RTC_IO"); break;
@@ -32,34 +80,16 @@ void print_wakeup_reason() {
           switch (pin)
           {
             case 39:
-               digitalWrite(PURPLE, HIGH);
-               delay(5000);
-               digitalWrite(PURPLE, LOW);
                 break;
             case 34:
-               digitalWrite(BLUE, HIGH);
-               delay(5000);
-               digitalWrite(BLUE, LOW);
               break;
             case 35:
-               digitalWrite(GREEN, HIGH);
-               delay(5000);
-               digitalWrite(GREEN, LOW);
                break;
             case 33:
-               digitalWrite(ORANGE, HIGH);
-               delay(5000);
-               digitalWrite(ORANGE, LOW);
                break;
             case 32:
-               digitalWrite(YELLOW, HIGH);
-               delay(5000);
-               digitalWrite(YELLOW, LOW);
                break;
             default:
-              digitalWrite(YELLOW, HIGH);
-              delay(5000);
-              digitalWrite(YELLOW, LOW);
               break;
           }
             
@@ -76,15 +106,32 @@ void print_wakeup_reason() {
   }
 }
 
+void showFont(const char name[], const GFXfont* f)
+{
+  display.fillScreen(GxEPD_WHITE);
+  display.setTextColor(GxEPD_BLACK);
+  display.setFont(f);
+  display.setCursor(0, 0);
+  display.println();
+  display.println(name);
+  display.println(" !\"#$%&'()*+,-./");
+  display.println("0123456789:;<=>?");
+  display.println("@ABCDEFGHIJKLMNO");
+  display.println("PQRSTUVWXYZ[\\]^_");
+  display.println("`abcdefghijklmno");
+  display.println("pqrstuvwxyz{|}~ ");
+  display.update();
+  delay(10000);
+}
+
 void setup() {
   Serial.begin(115200);
   delay(1000); //Take some time to open up the Serial Monitor
 
-  pinMode(PURPLE, OUTPUT);
-  pinMode(BLUE, OUTPUT);
-  pinMode(ORANGE, OUTPUT);
-  pinMode(YELLOW, OUTPUT);
-  pinMode(GREEN, OUTPUT);
+  display.init();
+  showFont("FreeMonoBold9pt7b", &FreeMonoBold9pt7b);
+
+  
  
   
   print_wakeup_reason();
@@ -96,7 +143,7 @@ void setup() {
   //Go to sleep now
 
   Serial.println("Going to sleep now");
-  delay(100);
+  delay(1000);
   esp_deep_sleep_start();
   Serial.println("This will never be printed");
 
