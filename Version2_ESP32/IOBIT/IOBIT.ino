@@ -3,20 +3,33 @@
  *         upon wakeup have a corresponding led light up
  *         
  * Goal 2: Update screen on wakeup
+ * 
+ * Goal 3: Get the time of the last button press to display on the screen
  */
-
+//---------------Include Libraries-----------------//
 #include <esp_deep_sleep.h>
 #include <GxEPD.h>
 #include <GxIO/GxIO_SPI/GxIO_SPI.h>
 #include <GxIO/GxIO.h>
+#include <WiFi.h>
+//------------------------------------------------//
+
+//---------------Include Fonts--------------------//
 
 #include <Fonts/FreeMonoBold9pt7b.h>
 
 //---------------Customization Info----------------//
 #define DISPLAY_TYPE '1.5bwy'
-//------------------------------------------------//
 
-//---------------E-Paper Display Defines----------//
+
+const char* ssid = "*****";
+const char* password = "****";
+
+const int timezone = 0 * 3600;
+const int dst = 0;
+//-------------------------------------------------//
+
+//---------------E-Paper Display------------------//
 
 // Configs/Includes based on which screen we are using
 #if DISPLAY_TYPE == '1.5bwy'
@@ -54,14 +67,40 @@ const String display_type = "4.2";
 
 GxIO_Class io(SPI, /*CS=5*/ SS, /*DC=*/ 17, /*RST=*/ 16); // arbitrary selection of 17, 16
 GxEPD_Class display(io, /*RST=*/ 16, /*BUSY=*/ 4); // arbitrary selection of (16), 4
-//------------------------------------------------//
+//-------------------------------------------------//
 
-//--------------Pin Defines----------------------//
-
-
-
+//--------------Pins-------------------------------//
 #define BUTTON_PIN_BITMASK 0x8F00000000 // pins 32, 33, 34, 35, and 39 will wakeup the chip
-//------------------------------------------------//
+//-------------------------------------------------//
+
+//--------------Networking-------------------------//
+const char* mqttServer = "test.mosquitto.org";
+const int mqttPort = 1883;
+
+WiFiClient espClient;
+//PubSubClient client(espClient);
+//-------------------------------------------------//
+
+void connect_to_wifi() {
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.println("Connecting to WiFi..");
+  }
+  if ( WiFi.status() == WL_CONNECTED) {
+    Serial.println("Connected to the WiFi network");
+  }
+}
+
+void connect_to_time_server() {
+  configTime(timezone, dst, "pool.ntp.org");  
+  setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 0);  
+  while(time(nullptr) <= 100000) {
+        Serial.print("Connecting to time server...");
+        delay(1000);
+      }
+  Serial.println("Connected");
+}
 
 void print_wakeup_reason() {
   esp_deep_sleep_wakeup_cause_t wakeup_reason;
@@ -106,7 +145,7 @@ void print_wakeup_reason() {
   }
 }
 
-void showFont(const char name[], const GFXfont* f)
+void display_word(const char name[], const GFXfont* f)
 {
   display.fillScreen(GxEPD_WHITE);
   display.setTextColor(GxEPD_BLACK);
@@ -114,26 +153,30 @@ void showFont(const char name[], const GFXfont* f)
   display.setCursor(0, 0);
   display.println();
   display.println(name);
-  display.println(" !\"#$%&'()*+,-./");
-  display.println("0123456789:;<=>?");
-  display.println("@ABCDEFGHIJKLMNO");
-  display.println("PQRSTUVWXYZ[\\]^_");
-  display.println("`abcdefghijklmno");
-  display.println("pqrstuvwxyz{|}~ ");
   display.update();
   delay(10000);
+}
+
+void time_to_string(time_t timestamp, char time_string[]) {
+  struct tm* p_tm = localtime(&timestamp);
+  strftime(time_string, 30, "%Y-%m-%d %H:%M:%S", p_tm);
 }
 
 void setup() {
   Serial.begin(115200);
   delay(1000); //Take some time to open up the Serial Monitor
 
-  display.init();
-  showFont("FreeMonoBold9pt7b", &FreeMonoBold9pt7b);
+  connect_to_wifi();
+  connect_to_time_server();
 
+  char time_string[30];
+  time_t now = time(nullptr);
+  time_to_string(now, time_string);
   
- 
-  
+
+  display.init();
+  display_word(time_string, &FreeMonoBold9pt7b);
+
   print_wakeup_reason();
 
   //If you were to use ext1, you would use it like
