@@ -5,6 +5,8 @@
  * Goal 2: Update screen on wakeup
  * 
  * Goal 3: Get the time of the last button press to display on the screen
+ * 
+ * Goal 4: Connect to Server
  */
 //---------------Include Libraries-----------------//
 #include <esp_deep_sleep.h>
@@ -12,18 +14,33 @@
 #include <GxIO/GxIO_SPI/GxIO_SPI.h>
 #include <GxIO/GxIO.h>
 #include <WiFi.h>
+#include <PubSubClient.h>
 //------------------------------------------------//
 
-//---------------Include Fonts--------------------//
-
+//---------------Fonts----------------------------//
+#include <Fonts/FreeSans7pt7b.h>
 #include <Fonts/FreeMonoBold9pt7b.h>
+#include <Fonts/FreeSansBold9pt7b.h>
+#include <Fonts/FreeSans9pt7b.h>
+//#include <Fonts/FreeSansBold24pt7b.h>
+#include <Fonts/FreeSansBold30pt7b.h>
+#include <Fonts/FreeSansBold36pt7b.h>
+
+const GFXfont* f7b = &FreeSans7pt7b;
+const GFXfont* f9b = &FreeSansBold9pt7b;
+const GFXfont* f9 = &FreeSans9pt7b;
+//const GFXfont* f24b = &FreeSansBold24pt7b;
+const GFXfont* f30b = &FreeSansBold30pt7b;
+const GFXfont* f36b = &FreeSansBold36pt7b;
+//-------------------------------------------------//
 
 //---------------Customization Info----------------//
 #define DISPLAY_TYPE '1.5bwy'
 
+const char* ssid = "***";
+const char* password = "***";
 
-const char* ssid = "*****";
-const char* password = "****";
+char my_name = 'A';
 
 const int timezone = 0 * 3600;
 const int dst = 0;
@@ -71,36 +88,53 @@ GxEPD_Class display(io, /*RST=*/ 16, /*BUSY=*/ 4); // arbitrary selection of (16
 
 //--------------Pins-------------------------------//
 #define BUTTON_PIN_BITMASK 0x8F00000000 // pins 32, 33, 34, 35, and 39 will wakeup the chip
+#define BUTTON_A 32
+#define BUTTON_B 33
+#define BUTTON_UNDO 34
+#define BUTTON_NEW_LOGFILE 35 
+#define BUTTON_SWITCH_VIS 39
 //-------------------------------------------------//
 
 //--------------Networking-------------------------//
+#define PUBLISH_WAIT 10
+
 const char* mqttServer = "test.mosquitto.org";
 const int mqttPort = 1883;
 
 WiFiClient espClient;
-//PubSubClient client(espClient);
+PubSubClient client(espClient);
+const char* device_id = "IOBITClient" + my_name;
+int number_of_expected_messages = 0;
 //-------------------------------------------------//
 
-void connect_to_wifi() {
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.println("Connecting to WiFi..");
-  }
-  if ( WiFi.status() == WL_CONNECTED) {
-    Serial.println("Connected to the WiFi network");
-  }
-}
+//--------------Message Parsing-------------------//
+#define DATA_COUNT_A_OFFSET 2
+#define DATA_COUNT_B_OFFSET 7
+#define DATA_COUNT_LENGTH 4
+#define DATA_NUMBER_OF_POINTS_OFFSET 12
+#define DATA_NUMBER_OF_POINTS_LENGTH 3
+#define MAX_NUMBER_OF_DATA_POINTS 100
+//-------------------------------------------------//
 
-void connect_to_time_server() {
-  configTime(timezone, dst, "pool.ntp.org");  
-  setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 0);  
-  while(time(nullptr) <= 100000) {
-        Serial.print("Connecting to time server...");
-        delay(1000);
-      }
-  Serial.println("Connected");
-}
+//--------------Data Structures--------------------//
+struct data_point {
+  char button;
+  struct tm* time_stamp;
+};
+struct coord {
+  int x;
+  int y;
+};
+//-------------------------------------------------//
+
+//--------------Data------------------------------//
+data_point points[MAX_NUMBER_OF_DATA_POINTS];
+int count_A = 0;
+int count_B = 0;
+time_t last_pub = 0;
+time_t last_push = 0;
+time_t last_button_press = 0;
+//-------------------------------------------------//
 
 void print_wakeup_reason() {
   esp_deep_sleep_wakeup_cause_t wakeup_reason;
@@ -118,15 +152,20 @@ void print_wakeup_reason() {
           int pin = __builtin_ffsll(wakeup_pin_mask) - 1;
           switch (pin)
           {
-            case 39:
+            case BUTTON_A:
+                Serial.println("BUTTON_A has been pressed");
                 break;
-            case 34:
-              break;
-            case 35:
+            case BUTTON_B:
+               Serial.println("BUTTON_B has been pressed");
                break;
-            case 33:
+            case BUTTON_UNDO:
+               Serial.println("BUTTON_UNDO has been pressed");
                break;
-            case 32:
+            case BUTTON_NEW_LOGFILE:
+               Serial.println("BUTTON_NEW_LOGFILE has been pressed");
+               break;
+            case BUTTON_SWITCH_VIS:
+               Serial.println("BUTTON_SWITCH_VIS has been pressed");
                break;
             default:
               break;
@@ -154,7 +193,7 @@ void display_word(const char name[], const GFXfont* f)
   display.println();
   display.println(name);
   display.update();
-  delay(10000);
+  delay(100);
 }
 
 void time_to_string(time_t timestamp, char time_string[]) {
@@ -166,33 +205,39 @@ void setup() {
   Serial.begin(115200);
   delay(1000); //Take some time to open up the Serial Monitor
 
+  //Connecting Networks
+  Serial.println("Connecting Networks");
   connect_to_wifi();
   connect_to_time_server();
+  connect_to_mqtt();
 
+  //Getting time right now
+  Serial.println("Getting time right now");
   char time_string[30];
   time_t now = time(nullptr);
   time_to_string(now, time_string);
-  
 
+  //Updating Display
+  Serial.println("Updating Display");
   display.init();
   display_word(time_string, &FreeMonoBold9pt7b);
 
+  //Respond to wakeup cause
+  Serial.println("Respond to wakeup cause");
   print_wakeup_reason();
 
-  //If you were to use ext1, you would use it like
-  //Serial.println(esp_deep_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK, ESP_EXT1_WAKEUP_ANY_HIGH));
+  //Enabling Wakeup
+  Serial.println("Enable Wakeup");
   esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK,ESP_EXT1_WAKEUP_ANY_HIGH);
 
-  //Go to sleep now
-
+  //Going to sleep now
   Serial.println("Going to sleep now");
   delay(1000);
   esp_deep_sleep_start();
   Serial.println("This will never be printed");
-
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-
 }
+
