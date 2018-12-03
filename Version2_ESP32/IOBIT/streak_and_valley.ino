@@ -38,7 +38,6 @@ void streaks_and_valleys() {
   display.setFont(f7b);
   display.setCursor(8, DISPLAY_HEIGHT - 6);
   display.println(dispaly_streak);
-  display.update();
 }
 
 int get_streak() {

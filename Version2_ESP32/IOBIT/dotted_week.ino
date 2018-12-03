@@ -77,10 +77,6 @@ void dotted_week() {
     display.setCursor( spot.x - 2, 0);
     display.println(days[i]);
   }
-  
-   display.update();
-   //Put the chip to sleep. 
-   ESP.deepSleep(6e7); // 20e6 is 20 microseconds
 }
 
 

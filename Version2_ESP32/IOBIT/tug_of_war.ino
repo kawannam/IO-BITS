@@ -33,11 +33,5 @@ void tug_of_war() {
         display.setTextColor(GxEPD_RED);
         display.println(String(percent_B) + "%");
       }
-  
-      //Push changes to the display
-      display.update();
-  
-      Serial.println("Drawing Done");
-    }
-    
+    } 
 }

@@ -102,7 +102,6 @@ void stacked_bars() {
     display.fillRect(x, y, 7, 7, GxEPD_RED);
     display.drawRect(x, y, 7, 7, GxEPD_BLACK);
   }
-   display.update();
 }
 
 

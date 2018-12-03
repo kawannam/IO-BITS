@@ -88,7 +88,5 @@ void plain_text_two_input_display() {
   }
   
   display.println(count_B);
-
-
 }
 
