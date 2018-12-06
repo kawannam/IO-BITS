@@ -1,4 +1,8 @@
 
+
+#define EDGE_BUFFER 5
+
+
 void display_text_adv(String string_to_display, int colour, const GFXfont* font, int x, int y) {
   display.setTextColor(colour);
   display.setFont(font);

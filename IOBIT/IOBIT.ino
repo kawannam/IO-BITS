@@ -44,7 +44,8 @@
 #include <Fonts/FreeMonoBold9pt7b.h>
 #include <Fonts/FreeSansBold9pt7b.h>
 #include <Fonts/FreeSans9pt7b.h>
-//#include <Fonts/FreeSansBold24pt7b.h>
+#include <Fonts/FreeMonoBold18pt7b.h>
+#include <Fonts/FreeSansBold24pt7b.h>
 #include <Fonts/FreeSansBold30pt7b.h>
 #include <Fonts/FreeSansBold36pt7b.h>
 //------------------------------------------------//
@@ -61,8 +62,8 @@ const char* password = "***";
 char my_name = 'A';
 
 //Set Timezone - Currently set for MST
-const int timezone = -6 * 60;
-const int dst = 2;
+const int timezone = -7 * 3600;
+const int dst = 0;
 //-------------------------------------------------//
 
 //--------------Data Structures--------------------//

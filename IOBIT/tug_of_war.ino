@@ -1,37 +1,37 @@
+/*
+ * tug_of_war: A visualization that highlights the ratio 
+ * of button presses between two button. Has two rectangles
+ * that push against each other to show the ratio. The %
+ * will be displayed on both sides if their is enough room
+ * 
+ */
+
 void tug_of_war() {
+    uint16_t w, h;
+    int ratio_A, count;
+    String percent_A, percent_B;
+    String no_data = "No Data";
+    const GFXfont* large_font = f18b;
+    const GFXfont* small_font = f9;
 
-    //Add font/ writting 
-      display.setFont(f9);
-      display.setRotation(1);
-
-
-    if (count_A == 0 && count_B == 0) {
+    count = count_A + count_B;
+    
+    if (count == 0) {
       display.fillScreen(GxEPD_WHITE);
-      display.setCursor(70, 70);
-      display.setTextColor(GxEPD_RED);
-      display.println("No Data");
-      
-      display.update();
-    } else {
-      float ratio_A = ((count_A * DISPLAY_WIDTH) / (count_A + count_B));
-      int percent_A = ((count_A * 100) / (count_A + count_B));
-      int percent_B = ((count_B * 100) / (count_A + count_B));
-  
-      Serial.println("Math Done: " + String(percent_A) + " " + String(percent_B));
-      
+      get_text_dimensions(no_data, large_font, &w, &h);
+      display_text_adv(no_data, GxEPD_BLACK, large_font, (DISPLAY_WIDTH/2) - (w/2), (DISPLAY_HEIGHT/2));
+      return;
+    }
+
+      ratio_A = ((count_A * DISPLAY_WIDTH) / count);           
       display.fillScreen(GxEPD_BLACK);
       display.fillRect(0, 0, ratio_A, DISPLAY_HEIGHT, GxEPD_RED);
-
-      if ( percent_A >= 25) {
-        display.setCursor(5, 140);
-        display.setTextColor(GxEPD_BLACK);
-        display.println(String(percent_A) + "%");
-      }
-
-      if (percent_B >= 25) {
-        display.setCursor(105, 140);
-        display.setTextColor(GxEPD_RED);
-        display.println(String(percent_B) + "%");
-      }
-    } 
+      
+      percent_A = String((count_A * 100) / count) + "%";
+      get_text_dimensions(percent_A, small_font, &w, &h);
+      if (ratio_A > w + EDGE_BUFFER) display_text_adv(percent_A, GxEPD_BLACK, small_font, EDGE_BUFFER, DISPLAY_HEIGHT - h);
+      
+      percent_B = String((count_B * 100) / count) + "%";
+      get_text_dimensions(percent_B, small_font, &w, &h);
+      if (DISPLAY_WIDTH - ratio_A > w + EDGE_BUFFER) display_text_adv(percent_B, GxEPD_RED, small_font, DISPLAY_WIDTH - w - EDGE_BUFFER, DISPLAY_HEIGHT - h);
 }

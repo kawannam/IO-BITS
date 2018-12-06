@@ -4,10 +4,6 @@
  * under it
  */
 
-
-#define EDGE_BUFFER 5
-
-
 void plain_text() {
   const GFXfont* large_font = f30b;
   const GFXfont* small_font = f7b;
@@ -26,14 +22,13 @@ void plain_text() {
   display_text_adv(String(count_A), GxEPD_BLACK, large_font, EDGE_BUFFER, l_h + EDGE_BUFFER);
   display_text_adv(String(time_A), GxEPD_BLACK, small_font, EDGE_BUFFER, s_h + l_h + EDGE_BUFFER + EDGE_BUFFER);
   display_text_adv(String(time_B), GxEPD_WHITE, small_font, (DISPLAY_WIDTH - s_w - EDGE_BUFFER), (DISPLAY_HEIGHT - s_h));
-  display_text_adv(String(count_B), GxEPD_WHITE, large_font, (DISPLAY_WIDTH - l_w - EDGE_BUFFER), (DISPLAY_HEIGHT - s_h - s_h - EDGE_BUFFER));
+  display_text_adv(String(count_B), GxEPD_WHITE, large_font, (DISPLAY_WIDTH - l_w - EDGE_BUFFER - EDGE_BUFFER), (DISPLAY_HEIGHT - s_h - s_h - EDGE_BUFFER));
 }
 
 
 String get_last_instance_timestamp(char button) {
-  Serial.println("get_last_instance_timestamp");
   char buff[30];
-  for (int i = 0; i < 10; i++) {
+  for (int i = current_number_of_points; i >= 0; i--) {
     time_to_string(points[i].timestamp, buff);
     if (points[i].button == button) {
       time_to_string_display(points[i].timestamp, buff);

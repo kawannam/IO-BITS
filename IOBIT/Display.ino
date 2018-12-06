@@ -76,7 +76,8 @@ GxEPD_Class display(io, RST, BUSY);
 const GFXfont* f7b = &FreeSans7pt7b;
 const GFXfont* f9b = &FreeSansBold9pt7b;
 const GFXfont* f9 = &FreeSans9pt7b;
-//const GFXfont* f24b = &FreeSansBold24pt7b;
+const GFXfont* f18b = &FreeMonoBold18pt7b;
+const GFXfont* f24b = &FreeSansBold24pt7b;
 const GFXfont* f30b = &FreeSansBold30pt7b;
 const GFXfont* f36b = &FreeSansBold36pt7b;
 //-------------------------------------------------//
@@ -88,7 +89,7 @@ const GFXfont* f36b = &FreeSansBold36pt7b;
 
 #define NUMBER_OF_VIS_OPTIONS 5
 
-RTC_DATA_ATTR int vis_option = 2;
+RTC_DATA_ATTR int vis_option = 1;
 //-------------------------------------------------//
 
 
