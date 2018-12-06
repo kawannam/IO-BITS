@@ -1,6 +1,24 @@
-
+/*
+ * Button_Handler: responds to the button presses.
+ * 
+ * If you have a different esp32 board and have to change 
+ * the pins you are using change the defines here (also see 
+ * display to change e-paper pins). Note that if you change
+ * the button pins you must change the BUTTON_PIN_BITMASK.
+ * (The left most bit is pin 39/VP, the rest are in desending
+ * order. 1 for wakeup 0 for ignore. For extra detail watch
+ * https://www.youtube.com/watch?v=r75MrWIVIw4&t=719s)
+ * 
+ * void detect_wakeup_reason() - will print the reason the device
+ * wokeup to serial. If it sees that it was a button press 
+ * it will call respond_to_button_press
+ * 
+ * void respond_to_button_press(uint64_t wakeup_pin_mask) - 
+ * calls the corresponding action based on which button was
+ * pressed
+ */
+ 
 //--------------Pins-------------------------------//
-#define BUTTON_PIN_BITMASK 0x8F00000000 // pins 32, 33, 34, 35, and 39 will wakeup the chip
 #define BUTTON_A 32
 #define BUTTON_B 33
 #define BUTTON_UNDO 34
@@ -8,7 +26,6 @@
 #define BUTTON_SWITCH_VIS 39
 //-------------------------------------------------//
 
-#define NUMBER_OF_VIS_OPTIONS 5
 
 void detect_wakeup_reason() {
   esp_deep_sleep_wakeup_cause_t wakeup_reason;
@@ -59,7 +76,7 @@ void respond_to_button_press(uint64_t wakeup_pin_mask) {
         {
            Serial.println("BUTTON_SWITCH_VIS has been pressed");
            notify_button_press('S');
-           vis_option = (vis_option + 1) % NUMBER_OF_VIS_OPTIONS;
+           switch_visualization();
            break;
         }
         default:

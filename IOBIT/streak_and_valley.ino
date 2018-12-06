@@ -1,11 +1,14 @@
-#define MAX_STREAK 7
+/*#define MAX_STREAK 7
 
 
 long randNumber = 0;
-int colour; 
+int colour; */
 
 void streaks_and_valleys() {
+  return;
+  /*
   Serial.println("Streaks and Valleys");
+   randomSeed(analogRead(0));
   if (display_type == "1.5bwr") {
     display.setRotation(1);
   } 
@@ -41,15 +44,15 @@ void streaks_and_valleys() {
 }
 
 int get_streak() {
-  struct tm* point_time;
+  struct time_t point_time;
   char p_time[30];
   bool days[MAX_NUMBER_OF_DATA_POINTS];
   for (int i = 0; i < MAX_NUMBER_OF_DATA_POINTS; i++) {
     days[i] = false;
   }
   time_t now = time(nullptr);
-  struct tm* now_tm = localtime(&now);
-  int checking_day = now_tm->tm_yday - 1;
+  //struct tm* now_tm = localtime(&now);
+  int checking_day = now.tm_yday - 1;
   int streak = 0;
   int index;
   for (int i = 0; i < MAX_NUMBER_OF_DATA_POINTS; i++) {
@@ -57,7 +60,7 @@ int get_streak() {
       //(points[i].time_stamp).toCharArray(p_time, 30);
       //strptime(p_time, "%Y-%m-%d %H:%M:%S", &point_time);
       point_time = points[i].time_stamp;
-      index = (now_tm->tm_yday - point_time->tm_yday) + ((now_tm->tm_year - point_time->tm_year)*365);
+      index = (now.tm_yday - point_time.tm_yday) + ((now.tm_year - point_time.tm_year)*365);
       if (index < MAX_NUMBER_OF_DATA_POINTS) {
         days[index] = true;
       }
@@ -90,6 +93,6 @@ int get_streak() {
   if (streak > -999) {
     return streak;
   }
-  return 0;
+  return 0;*/
 }
 

@@ -1,4 +1,4 @@
-  //int space_for_titles = 15;
+/*  //int space_for_titles = 15;
   
   int s_height = DISPLAY_HEIGHT - space_for_titles;
   int s_width = DISPLAY_WIDTH - space_for_titles;
@@ -29,8 +29,10 @@ void draw_time_interval(tm* start_time, tm* end_time) {
     display.fillRect( x2, space_for_titles+2, (s_width)/7, height, GxEPD_RED);
   }
 }
-
+*/
 void stacked_bars() {
+  return;
+  /*
   Serial.println("Stacked Bars");
   
   display.setRotation(1);
@@ -101,7 +103,7 @@ void stacked_bars() {
   } else {
     display.fillRect(x, y, 7, 7, GxEPD_RED);
     display.drawRect(x, y, 7, 7, GxEPD_BLACK);
-  }
+  }*/
 }
 
 

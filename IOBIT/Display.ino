@@ -1,15 +1,45 @@
-//---------------Fonts----------------------------//
-const GFXfont* f7b = &FreeSans7pt7b;
-const GFXfont* f9b = &FreeSansBold9pt7b;
-const GFXfont* f9 = &FreeSans9pt7b;
-//const GFXfont* f24b = &FreeSansBold24pt7b;
-const GFXfont* f30b = &FreeSansBold30pt7b;
-const GFXfont* f36b = &FreeSansBold36pt7b;
-//-------------------------------------------------//
+/*
+ * Display: Handles general display items, decides which
+ * visualization to display, and updates the screen
+ * 
+ * E-Paper Display Type - The code should work on a 
+ * variety of screen sizes. Based on the indicated
+ * screen type in "Customization Info" this section 
+ * will include the right lib and configure the consts
+ * 
+ * E-Paper Display Pins - This section defines the pins
+ * the e-paper is connected too, if you have a different
+ * board you may need to change these.
+ * 
+ * Fonts - makes font object for the specific vis tabs
+ * to utilize
+ * 
+ * General Visualization Defines - misc definitions
+ * 
+ * void setup_display() - initializes the display, and 
+ * does any screen specific setup steps
+ * 
+ * void switch_visualization() - changes vis_option, 
+ * indicating that a different visualization should be
+ * displayed. vis_option is a special type of variable
+ * that is maintained throughout deepsleep (RTC_DATA_ATTR)
+ * 
+ * void update_vis() - based on vis_option calls the
+ * coresponding vis tab and updates the screen. Addtionally,
+ * it prints to serail which vis is being called
+ * 
+ * void display_error(const char error[], const GFXfont* f) -
+ * If an error occures (i.e. cannot connect to the wifi) the
+ * screen will display the error message.
+ * 
+ * Note to Kendra: implement utilizing error screen
+ * 
+ */
 
-//---------------E-Paper Display------------------//
 
+//---------------E-Paper Display Type--------------//
 // Configs/Includes based on which screen we are using
+
 #if DISPLAY_TYPE == '1.5bwy'
 #include <GxGDEW0154Z17/GxGDEW0154Z17.h>
 #define DISPLAY_HEIGHT 152
@@ -28,8 +58,9 @@ const String display_type = "1.5bwr";
 #define DISPLAY_WIDTH 400
 const String display_type = "4.2";
 #endif
+//-------------------------------------------------//
 
-// Pins screen is connected to
+//---------------E-Paper Display Pins--------------//
 #define BUSY 4
 #define RST 16
 #define DC 17
@@ -37,50 +68,82 @@ const String display_type = "4.2";
 #define CLK 18
 #define DIN 23
 
-GxIO_Class io(SPI, /*CS=5*/ SS, /*DC=*/ 17, /*RST=*/ 16); // arbitrary selection of 17, 16
-GxEPD_Class display(io, /*RST=*/ 16, /*BUSY=*/ 4); // arbitrary selection of (16), 4
+GxIO_Class io(SPI, CS, DC, RST);
+GxEPD_Class display(io, RST, BUSY);
 //-------------------------------------------------//
+
+//---------------Fonts-----------------------------//
+const GFXfont* f7b = &FreeSans7pt7b;
+const GFXfont* f9b = &FreeSansBold9pt7b;
+const GFXfont* f9 = &FreeSans9pt7b;
+//const GFXfont* f24b = &FreeSansBold24pt7b;
+const GFXfont* f30b = &FreeSansBold30pt7b;
+const GFXfont* f36b = &FreeSansBold36pt7b;
+//-------------------------------------------------//
+
+//---------------General Visualization Defines-----//
+#define HOURS_IN_A_DAY 24
+#define DAYS_IN_A_WEEK 7
+#define DAYS_IN_A_YEAR 365
+
+#define NUMBER_OF_VIS_OPTIONS 5
+
+RTC_DATA_ATTR int vis_option = 2;
+//-------------------------------------------------//
+
+
 void setup_display() {
   display.init();
-  if (display_type == "1.54bwr") {
+  if ((display_type == "1.54bwr") || (display_type == "1.5bwy")) {
     display.setRotation(1);
   }
-  randomSeed(analogRead(0));
 }
 
 
-void display_word(const char name[], const GFXfont* f)
+void switch_visualization() {
+  vis_option = (vis_option + 1) % NUMBER_OF_VIS_OPTIONS;
+}
+
+
+void update_vis() {
+    switch (vis_option) {
+      case 0: 
+        Serial.println("Displaying: Dotted Week Visualization");
+        dotted_week();
+        break;
+      case 1:
+        Serial.println("Displaying: Tug of War Visualization");
+        tug_of_war();
+        break;
+      case 2:
+        Serial.println("Displaying: Plain Text Visualization");
+        plain_text();
+        break;
+      case 3:
+        Serial.println("Displaying: Streaks and Valleys Visualization");
+        streaks_and_valleys();
+        break;
+      default:
+        Serial.println("Displaying: Stacked Bars Visualization");
+        stacked_bars();
+        break;
+    }
+    display.update();
+    delay(100);
+}
+
+
+void display_error(const char error[], const GFXfont* f)
 {
   display.fillScreen(GxEPD_WHITE);
   display.setTextColor(GxEPD_BLACK);
   display.setFont(f);
   display.setCursor(0, 0);
   display.println();
-  display.println(name);
-  display.update();
-  delay(100);
+  display.println(error);
 }
 
-void update_vis() {
-    Serial.println("All messages recieved - deciding on vis");
-    switch (vis_option) {
-      case 0: 
-        dotted_week();
-        break;
-      case 1:
-        tug_of_war();
-        break;
-      case 2:
-        plain_text();
-        break;
-      case 3:
-        streaks_and_valleys();
-        break;
-      default:
-        stacked_bars();
-        break;
-    }
-    display.update();
-}
+
+
 
 

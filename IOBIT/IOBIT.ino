@@ -1,3 +1,29 @@
+/* 
+ *  IOBIT: this is the main file (also known as tab) for this
+ *  ardino project. This project is a simple technology assisted
+ *  self-logging tool. The device will wakeup on a button press
+ *  send a timestamp to the server and update the visualization
+ *  displayed on the screen before going back into deepsleep.
+ *  
+ *  I am using an ESP32 dev board, a 1.54" 3 colour e-paper 
+ *  display (should also works with 4.2 3 colour displays),
+ *  5 push buttons, and a lipo battery. The pins for other
+ *  esp32 boards may vary
+ *  
+ *  Created by Kendra Wannamaker 2018, working with
+ *  Dr. Wesley Willett and Dr. Marian Dörk.
+ *  
+ *  This file:
+ *  - Imports all needed libraries
+ *  - Declares all global variables
+ *  - Defines all data structures
+ *  - Contains setup() which is called upon wakeup from
+ *    deepslee and is used as the main driver for the 
+ *    application
+ *  - Contains loop() which is never called
+ *
+ */
+
 //---------------Libraries------------------------//
 //Sleep
 #include <esp_deep_sleep.h>
@@ -12,9 +38,8 @@
 //Wifi
 #include <WiFi.h>
 #include <PubSubClient.h>
-//------------------------------------------------//
 
-//---------------Fonts----------------------------//
+//Fonts
 #include <Fonts/FreeSans7pt7b.h>
 #include <Fonts/FreeMonoBold9pt7b.h>
 #include <Fonts/FreeSansBold9pt7b.h>
@@ -25,23 +50,25 @@
 //------------------------------------------------//
 
 //---------------Customization Info----------------//
+//Indicate the exact screen type
 #define DISPLAY_TYPE '1.5bwy'
 
+//Internet credentials 
 const char* ssid = "***";
 const char* password = "***";
 
+//Device specific char
 char my_name = 'A';
 
-const int timezone = 0 * 3600;
-const int dst = 0;
+//Set Timezone - Currently set for MST
+const int timezone = -6 * 60;
+const int dst = 2;
 //-------------------------------------------------//
-
-
 
 //--------------Data Structures--------------------//
 struct data_point {
   char button;
-  struct tm* time_stamp;
+  time_t timestamp;
 };
 struct coord {
   int x;
@@ -54,9 +81,8 @@ struct coord {
 //-------------------------------------------------//
 
 //--------------Public Variables-------------------//
-WiFiClient espClient;
-PubSubClient client(espClient);
-RTC_DATA_ATTR int vis_option = 0;
+
+
 //-------------------------------------------------//
 
 

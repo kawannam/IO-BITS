@@ -79,10 +79,12 @@ class EventHandler:
 
         counts = ','.join(str(c) for c in press_data)
         print(counts)
-        publish.single(EventHandler.RESPONSE, payload=",".join([fields[0], counts,
-                        str(len(pts)).zfill(3)]).rstrip(","),hostname=server)
+        test = ",".join([fields[0], counts,str(len(pts))]).rstrip(",")
+        print(test)
+        publish.single(EventHandler.RESPONSE,
+                       payload= test,
+                       hostname=server)
         if len(pts) > 0:
-            print("here")
             publish.multiple(pts, hostname=server)
         print("Done responding to data request.")
 

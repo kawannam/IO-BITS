@@ -1,4 +1,13 @@
-
+/*
+ * Wifi: Initializes connection to wifi
+ * 
+ * void connect_to_wifi() - tries to connect to 
+ * wifi indefinately. 
+ * 
+ * Note to Kendra - maybe it should give up and give an error
+ * Note to Kendra - write a wifi deconstructor
+ * 
+ */
 void connect_to_wifi() {
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
