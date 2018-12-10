@@ -44,6 +44,7 @@ int data_message(byte* payload, unsigned int length) {
 }
 
 void data_response_message_points(byte* payload, unsigned int length, int number_of_expected_messages) {
+  if (length == 0) return;
   char *str;
   char pay[length];
   time_t the_time;

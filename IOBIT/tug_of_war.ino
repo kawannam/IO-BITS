@@ -10,16 +10,14 @@ void tug_of_war() {
     uint16_t w, h;
     int ratio_A, count;
     String percent_A, percent_B;
-    String no_data = "No Data";
-    const GFXfont* large_font = f18b;
+    
+    
     const GFXfont* small_font = f9;
 
     count = count_A + count_B;
     
     if (count == 0) {
-      display.fillScreen(GxEPD_WHITE);
-      get_text_dimensions(no_data, large_font, &w, &h);
-      display_text_adv(no_data, GxEPD_BLACK, large_font, (DISPLAY_WIDTH/2) - (w/2), (DISPLAY_HEIGHT/2));
+      no_data_display();
       return;
     }
 

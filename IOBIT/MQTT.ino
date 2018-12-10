@@ -87,11 +87,9 @@ void message_callback(char* topic, byte* payload, unsigned int length) {
     String type = String(topic);
     
     if (type ==  "iobits/DataResponse") {
-      Serial.println("Data Response Recieved ");
       number_of_expected_messages = data_message(payload, length);
 
     } else if (type == "iobits/DataResponsePoints") {
-      Serial.println("DataResponsePoints ");
       number_of_expected_messages = number_of_expected_messages - 1;
       data_response_message_points(payload, length, number_of_expected_messages);
 

@@ -1,78 +1,72 @@
+/*
+ * 
+ */
 
 //--------------sizing and spacing consts--------------//
 const int space_for_titles = 15;
-const int d_height = DISPLAY_HEIGHT - space_for_titles;
-const int d_width = DISPLAY_WIDTH - space_for_titles;
-const int dot_size = d_height/HOURS_IN_A_DAY;
+const int dot_rad = ((DISPLAY_HEIGHT - space_for_titles)/(HOURS_IN_A_DAY*2)) + .5;
+const int dot_diam = dot_rad*2;
 //-----------------------------------------------------//
 
 void dotted_week() {
-  return;
-  /*
+  coord spot;
+  int checking_yday, checking_wday, colour;
   display.fillScreen(GxEPD_WHITE);
 
-  coord spot;
   time_t now = time(nullptr);
-  //struct tm* now_tm = localtime(&now);
-  //struct tm* p_tm;
-  time_t point_time;
+  struct tm* now_tm = localtime(&now);
+  struct tm* point_tm;
 
-  spot = dotted_week_get_spot(now.tm_hour, now.tm_wday);
-  display.drawRect(spot.x - (dot_size/2), spot.y - (dot_size/2), dot_size, dot_size, GxEPD_BLACK);
-
-  for(int i = 0; i < MAX_NUMBER_OF_DATA_POINTS; i++) {
-    if(points[i].time_stamp == NULL) {
-      continue;
+  checking_yday = now_tm->tm_yday;
+  checking_wday = now_tm->tm_wday;
+  for(int i = 0; i < current_number_of_points; i++) {
+    point_tm = localtime(&points[i].timestamp);
+    Serial.println(checking_yday - point_tm->tm_yday);
+    Serial.println("DAY OF THE WEEK " + String(now_tm->tm_wday) + " checking " + String(checking_yday) + " point y day " + String(point_tm->tm_yday));
+    if (checking_wday >= (checking_yday - point_tm->tm_yday)) { 
+      Serial.println("HERE");
+      if (points[i].button == 'A') colour = GxEPD_BLACK;
+      else colour = GxEPD_RED;
+      spot = dotted_week_get_spot(point_tm->tm_hour, point_tm->tm_wday); 
+      display.fillCircle(spot.x, spot.y, dot_rad, colour); 
     }
+  }
 
-    point_time = points[i].time_stamp;
-    //Need to handle year roll over
-    if (now_tm.tm_wday >= (now_tm.tm_yday - p_tm.tm_yday) + (DAYS_IN_A_YEAR*(now_tm.tm_year - p_tm.tm_year))) {
-      spot = dotted_week_get_spot(p_tm->tm_hour, now_tm->tm_wday);
-      if (points[i].button == 'A') {
-        display.fillCircle(spot.x, spot.y, (dot_size/2), GxEPD_BLACK); //button is A -> colour black
+  for (int i = 0; i <= HOURS_IN_A_DAY; i++) {
+    for(int j = 0; j < DAYS_IN_A_WEEK; j++) {
+      spot = dotted_week_get_spot(i, j);
+      if ((i == now_tm->tm_hour) && (j == now_tm->tm_wday)) {
+        display.drawRect(spot.x - dot_rad, spot.y - dot_rad, dot_diam + 1, dot_diam + 1, GxEPD_BLACK);
       } else {
-        display.fillCircle(spot.x, spot.y, (dot_size/2), GxEPD_RED); //button is B -> colour yellow/red
+        display.drawCircle(spot.x, spot.y, dot_rad, GxEPD_BLACK);
       }
     }
   }
 
-  for (int i = 0; i < 24; i++) {
-    for(int j = 0; j < 7; j++) {
-      if (! (i == now_tm->tm_hour && j == now_tm->tm_wday)) {
-        spot = dotted_week_get_spot(i, j);
-        display.drawCircle(spot.x, spot.y, (dot_size/2), GxEPD_BLACK);
-      } else {
-      }
-    }
-  }
+  display.setFont(f7b);
+  display.setTextColor(GxEPD_RED);
+  uint16_t w, h;
 
-  display.setCursor(0, 0);
- 
-  if (display_type == "4.2") {
-    display.setTextColor(GxEPD_BLACK);
-  } else {
-     display.setTextColor(GxEPD_RED);
-  }
+  get_text_dimensions("0", f7b, &w, &h);
   for( int i = 0; i < 24; i = i +3) {
     spot = dotted_week_get_spot( i, 0);
-    display.setCursor(0, spot.y  - 2);
+    display.setCursor(0, spot.y  + (h/4) );
     display.println(i);
   }
-  char days[7] = {'U', 'M', 'T', 'W', 'R', 'F', 'S'};
+  
   for( int i = 0; i < 7; i++) {
     spot = dotted_week_get_spot(0, i);
-    display.setCursor( spot.x - 2, 0);
+    display.setCursor( spot.x - ((w*3)/4), h);
     display.println(days[i]);
-  }*/
+  }
 }
-/*
+
 coord dotted_week_get_spot(int p_hour, int p_wday) {
   coord spot;
+  int d_height = DISPLAY_HEIGHT - space_for_titles;
+  int d_width = DISPLAY_WIDTH - space_for_titles;
   spot.y = ((p_hour*d_height)/HOURS_IN_A_DAY) + (d_height/(HOURS_IN_A_DAY*2)) + space_for_titles;
   spot.x = ((p_wday*d_width)/DAYS_IN_A_WEEK) + (d_width/(DAYS_IN_A_WEEK*2)) + space_for_titles;
   return spot;
-}*/
-
-
+}
 
