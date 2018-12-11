@@ -4,8 +4,9 @@
 
 
 void display_text_adv(String string_to_display, int colour, const GFXfont* font, int x, int y) {
+  if (font == NULL) display.setFont();
+  else display.setFont(font);
   display.setTextColor(colour);
-  display.setFont(font);
   display.setCursor(x, y);
   display.println(string_to_display);
 }

@@ -1,109 +1,85 @@
-/*  //int space_for_titles = 15;
-  
-  int s_height = DISPLAY_HEIGHT - space_for_titles;
-  int s_width = DISPLAY_WIDTH - space_for_titles;
+/*
+ * 
+ */
+#define NOW_BOX_SIDE 7
 
-coord stacked_bar_get_spot(int p_hour, int p_wday) {
-  coord spot;
-  spot.x = ((p_wday*s_width)/7) + (s_width/14) + space_for_titles;
-  spot.y = ((p_hour*s_height)/24) + (s_height/48) + space_for_titles;
-  return spot;
-}
+int h_section = (DISPLAY_HEIGHT - space_for_titles)/(HOURS_IN_A_DAY); 
+int w_section = (DISPLAY_WIDTH - space_for_titles)/DAYS_IN_A_WEEK;
 
-void draw_time_interval(tm* start_time, tm* end_time) {
-  int x = (start_time->tm_wday * s_width)/7 + space_for_titles + 1;
-  //int y = start_time->tm_hour * (s_height/24) + space_for_titles;
-  int y = ((start_time->tm_hour*s_height)/24) + space_for_titles + 1;
-  if (start_time->tm_yday == end_time->tm_yday) {
-    int height = ((start_time->tm_hour - end_time->tm_hour)* s_height)/-24;
-    display.fillRect( x, y, (s_width)/7, height, GxEPD_RED);
-  } else {
-    display.fillRect( x, y, (s_width)/7 - 1, s_height - y, GxEPD_RED);
-    int d_day = start_time->tm_wday + 1;
-    while (d_day < end_time->tm_wday) {
-      display.fillRect( ((d_day*s_width)/7) + space_for_titles, space_for_titles, (s_width)/7 - 1, s_height, GxEPD_RED);
-      d_day++;
-    }
-    int height = (end_time->tm_hour* s_height)/24 + space_for_titles;
-    int x2 = (end_time->tm_wday * s_width)/7 + space_for_titles + 1;
-    display.fillRect( x2, space_for_titles+2, (s_width)/7, height, GxEPD_RED);
-  }
-}
-*/
+
 void stacked_bars() {
-  return;
-  /*
-  Serial.println("Stacked Bars");
-  
-  display.setRotation(1);
-  display.fillScreen(GxEPD_WHITE);
+  int x, y;
+  uint16_t w, h;
+  struct tm start_time;
+  struct tm end_time;
 
-  //Draw graph space (titles not included)
-  display.drawRect(space_for_titles, space_for_titles, s_height- 2, s_width - 2, GxEPD_BLACK);
-
-  //Add titles
-  display.setTextColor(GxEPD_RED);
-  coord spot;
-  for( int i = 0; i < 24; i = i + 3) {
-    spot = stacked_bar_get_spot(i, 0);
-    display.setCursor(0, spot.y - 3);
-    display.println(i);
-    display.drawLine(space_for_titles, (((i*s_height)/24) + space_for_titles), DISPLAY_WIDTH, (((i*s_height)/24) + space_for_titles), GxEPD_BLACK);
-  }
-  char days[7] = {'U', 'M', 'T', 'W', 'R', 'F', 'S'};
-  for( int i = 0; i < 7; i++) {
-    spot = stacked_bar_get_spot(0, i);
-    display.setCursor( spot.x - 2, 0);
-
-    display.println(days[i]);
-    display.drawLine(((i*s_width)/7) + space_for_titles, space_for_titles, ((i*s_width)/7) + space_for_titles, DISPLAY_HEIGHT, GxEPD_BLACK);
-  }
-
-  //Fill in data
   time_t now = time(nullptr);
-  struct tm* now_tm = localtime(&now);
+  struct tm now_tm = *localtime(&now);
 
-  for(int i = 0; i < MAX_NUMBER_OF_DATA_POINTS - 1; i = i +2) {
-    struct tm start_time;
-    struct tm end_time;
-    char s_time[30];
-    char e_time[30];
-      
-    int j = i + 1;
+  display.fillScreen(GxEPD_WHITE);
+  display.setTextColor(GxEPD_RED);
+  display.setFont();
 
-    if ( points[i].time_stamp != NULL ) {
-    //(points[i].time_stamp).toCharArray(s_time, 30);
-    //strptime(s_time, "%Y-%m-%d %H:%M:%S", &start_time);
-    start_time = *points[i].time_stamp;
-    if (points[j].time_stamp != NULL ) {
-    //(points[j].time_stamp).toCharArray(e_time, 30);
-    //strptime(e_time, "%Y-%m-%d %H:%M:%S", &end_time);
-    end_time = *points[i].time_stamp;
-    } else {
-      end_time = *now_tm;
-    }
-    if (start_time.tm_wday >= (start_time.tm_yday - end_time.tm_yday)) {
-      draw_time_interval(&start_time, &end_time);
-      spot = stacked_bar_get_spot(start_time.tm_hour, end_time.tm_wday);
-      //if (points[i].button == 'A') {
-    } else {
-      Serial.println(start_time.tm_wday);
-      Serial.println(start_time.tm_yday);
-      Serial.println(end_time.tm_yday);
+  get_text_dimensions("W", NULL, &w, &h);
+
+  for (int i = 1; i < current_number_of_points; i = i+2) {
+    start_time = *localtime(&points[i-1].timestamp);
+    end_time = *localtime(&points[i].timestamp);
+
+    if (now_tm.tm_wday >= (start_time.tm_yday - end_time.tm_yday)) {
+      draw_time_interval(start_time, end_time);
     }
   }
+
+  x = (now_tm.tm_wday * w_section) + ((w_section - NOW_BOX_SIDE)/2) + space_for_titles;
+  y = (now_tm.tm_hour * h_section) + ((h_section - NOW_BOX_SIDE)/2) + space_for_titles;
+  if (((count_A + count_B) % 2) != 0) {
+    start_time = *(localtime(&points[current_number_of_points - 1].timestamp));
+    draw_time_interval(start_time, now_tm);
+    display.fillRect(x, y, NOW_BOX_SIDE, NOW_BOX_SIDE, GxEPD_RED);
+  }
+  display.drawRect(x, y, NOW_BOX_SIDE, NOW_BOX_SIDE, GxEPD_BLACK);
+  
+  for (int i = 0; i <= DAYS_IN_A_WEEK; i++) {
+    x = ( i * w_section ) + space_for_titles;
+    display.drawLine(x, space_for_titles, x, space_for_titles + (h_section*HOURS_IN_A_DAY), GxEPD_BLACK);
+    display.setCursor(x + ((w_section - w)/2) , 0);
+    display.print(days[i]);
   }
 
-    spot = dotted_week_get_spot(now_tm->tm_hour, now_tm->tm_wday);
-  int x = (now_tm->tm_wday * (s_width/7)) + (s_width/14) + space_for_titles - 1;
-  int y = (now_tm->tm_hour * (s_height/24)) + (s_height/48) + space_for_titles + 3;
+  for (int i = 0; i <= HOURS_IN_A_DAY; i = i+3) {
+    y = space_for_titles + (h_section*i);
+    display.drawLine(space_for_titles, y, space_for_titles + (w_section*DAYS_IN_A_WEEK), y, GxEPD_BLACK);
+    display.setCursor(0,y);
+    display.print(i);
+  }
 
-  if (((count_A + count_B) % 2) == 0) {
-    display.drawRect(x, y, 7, 7, GxEPD_BLACK);
-  } else {
-    display.fillRect(x, y, 7, 7, GxEPD_RED);
-    display.drawRect(x, y, 7, 7, GxEPD_BLACK);
-  }*/
 }
 
+
+void draw_time_interval(tm start_time, tm end_time) {
+  int height, x, y;
+  x = (start_time.tm_wday * w_section) + space_for_titles;
+  y = (start_time.tm_hour * h_section) + space_for_titles;
+
+  if (start_time.tm_yday == end_time.tm_yday) {
+    height = (end_time.tm_hour - start_time.tm_hour)* h_section;
+    display.fillRect( x, y, w_section, height, GxEPD_RED);
+        
+  } else {
+    height = ((HOURS_IN_A_DAY - start_time.tm_hour)*h_section);
+    display.fillRect( x, y, w_section, height, GxEPD_RED);
+
+    y = space_for_titles;
+    height = (HOURS_IN_A_DAY*h_section);
+    for (int i = 1; i < end_time.tm_yday - start_time.tm_yday; i++) {
+      x = ((start_time.tm_wday + i)*w_section) + space_for_titles;    
+      display.fillRect(x, y, w_section, height, GxEPD_RED);
+    }
+    
+    x = (end_time.tm_wday * w_section) + space_for_titles;
+    height = (end_time.tm_hour)* h_section;
+    display.fillRect( x_end, y, width, height, GxEPD_RED);
+  }
+}
 

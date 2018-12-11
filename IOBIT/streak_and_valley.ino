@@ -40,22 +40,21 @@ void streaks_and_valleys() {
 }
 
 int get_streak() {
-  struct tm* now_tm;
-  struct tm* point_tm;
+  struct tm now_tm;
+  struct tm point_tm;
   int checking_day, checking_year, index, streak;
   bool days[MAX_NUMBER_OF_DAYS];
   for (int i = 0; i < MAX_NUMBER_OF_DAYS; i++) days[i] = false;
 
   time_t now = time(nullptr);
-  now_tm = localtime(&now);
-  checking_day = now_tm->tm_yday;
-  checking_year = now_tm->tm_year;
+  now_tm = *localtime(&now);
+  checking_day = now_tm.tm_yday;
+  checking_year = now_tm.tm_year;
   
-  Serial.println("NOW " + String(now_tm->tm_yday) + " YEAR " + String(now_tm->tm_year));
   for (int i = 0; i < current_number_of_points; i++) {
     if ( points[i].timestamp != NULL ) {
-      point_tm = localtime(&points[i].timestamp);
-      index = (checking_day - point_tm->tm_yday) + ((checking_year - point_tm->tm_year)*DAYS_IN_A_YEAR);
+      point_tm = *localtime(&points[i].timestamp);
+      index = (checking_day - point_tm.tm_yday) + ((checking_year - point_tm.tm_year)*DAYS_IN_A_YEAR);
       if (index < MAX_NUMBER_OF_DAYS) days[index] = true;
     }
   }

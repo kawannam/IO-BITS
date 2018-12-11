@@ -3,7 +3,6 @@
  */
 
 //--------------sizing and spacing consts--------------//
-const int space_for_titles = 15;
 const int dot_rad = ((DISPLAY_HEIGHT - space_for_titles)/(HOURS_IN_A_DAY*2)) + .5;
 const int dot_diam = dot_rad*2;
 //-----------------------------------------------------//
@@ -14,20 +13,15 @@ void dotted_week() {
   display.fillScreen(GxEPD_WHITE);
 
   time_t now = time(nullptr);
-  struct tm* now_tm = localtime(&now);
-  struct tm* point_tm;
+  struct tm now_tm = *localtime(&now);
+  struct tm point_tm;
 
-  checking_yday = now_tm->tm_yday;
-  checking_wday = now_tm->tm_wday;
   for(int i = 0; i < current_number_of_points; i++) {
-    point_tm = localtime(&points[i].timestamp);
-    Serial.println(checking_yday - point_tm->tm_yday);
-    Serial.println("DAY OF THE WEEK " + String(now_tm->tm_wday) + " checking " + String(checking_yday) + " point y day " + String(point_tm->tm_yday));
-    if (checking_wday >= (checking_yday - point_tm->tm_yday)) { 
-      Serial.println("HERE");
+    point_tm = *localtime(&points[i].timestamp);
+    if (now_tm.tm_wday >= (now_tm.tm_yday - point_tm.tm_yday)) { 
       if (points[i].button == 'A') colour = GxEPD_BLACK;
       else colour = GxEPD_RED;
-      spot = dotted_week_get_spot(point_tm->tm_hour, point_tm->tm_wday); 
+      spot = dotted_week_get_spot(point_tm.tm_hour, point_tm.tm_wday); 
       display.fillCircle(spot.x, spot.y, dot_rad, colour); 
     }
   }
@@ -35,7 +29,7 @@ void dotted_week() {
   for (int i = 0; i <= HOURS_IN_A_DAY; i++) {
     for(int j = 0; j < DAYS_IN_A_WEEK; j++) {
       spot = dotted_week_get_spot(i, j);
-      if ((i == now_tm->tm_hour) && (j == now_tm->tm_wday)) {
+      if ((i == now_tm.tm_hour) && (j == now_tm.tm_wday)) {
         display.drawRect(spot.x - dot_rad, spot.y - dot_rad, dot_diam + 1, dot_diam + 1, GxEPD_BLACK);
       } else {
         display.drawCircle(spot.x, spot.y, dot_rad, GxEPD_BLACK);
@@ -48,13 +42,13 @@ void dotted_week() {
   uint16_t w, h;
 
   get_text_dimensions("0", f7b, &w, &h);
-  for( int i = 0; i < 24; i = i +3) {
+  for( int i = 0; i < HOURS_IN_A_DAY; i = i +3) {
     spot = dotted_week_get_spot( i, 0);
     display.setCursor(0, spot.y  + (h/4) );
     display.println(i);
   }
   
-  for( int i = 0; i < 7; i++) {
+  for( int i = 0; i < DAYS_IN_A_WEEK; i++) {
     spot = dotted_week_get_spot(0, i);
     display.setCursor( spot.x - ((w*3)/4), h);
     display.println(days[i]);

@@ -30,13 +30,13 @@ void connect_to_time_server() {
 }
 
 void time_to_string_display(time_t timestamp, char time_string[]) {
-  struct tm* p_tm = localtime(&timestamp);
-  strftime(time_string, 30, "%H:%M %b %e '%y", p_tm);
+  struct tm p_tm = *localtime(&timestamp);
+  strftime(time_string, 30, "%H:%M %b %e '%y", &p_tm);
 }
 
 void time_to_string(time_t timestamp, char time_string[]) {
-  struct tm* p_tm = localtime(&timestamp);
-  strftime(time_string, 30, "%Y-%m-%d %H:%M:%S", p_tm);
+  struct tm p_tm = *localtime(&timestamp);
+  strftime(time_string, 30, "%Y-%m-%d %H:%M:%S", &p_tm);
 }
 
 void string_to_time(char time_string[], time_t* timestamp) {

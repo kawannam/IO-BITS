@@ -59,6 +59,7 @@
 const char* ssid = "***";
 const char* password = "***";
 
+
 //Device specific char
 char my_name = 'A';
 
@@ -120,7 +121,7 @@ void setup() {
   Serial.println("Enable Wakeup");
   esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK,ESP_EXT1_WAKEUP_ANY_HIGH);
 
-  //Going to sleep now
+   //Going to sleep now
   Serial.println("Going to sleep now");
   delay(1000);
   esp_deep_sleep_start();
