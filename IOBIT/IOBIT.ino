@@ -99,15 +99,12 @@ void setup() {
   connect_to_time_server();
   connect_to_mqtt();
 
-  //Getting time right now
-  Serial.println("Getting time right now");
-  char time_string[30];
-  time_t now = time(nullptr);
-  time_to_string(now, time_string);
-
   //Respond to wakeup cause
   Serial.println("Respond to wakeup cause");
+  delay(1000);
   detect_wakeup_reason();
+
+  respond_to_button_press();
 
   //Request Data
   request_data();

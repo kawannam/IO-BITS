@@ -79,7 +79,7 @@ void draw_time_interval(tm start_time, tm end_time) {
     
     x = (end_time.tm_wday * w_section) + space_for_titles;
     height = (end_time.tm_hour)* h_section;
-    display.fillRect( x_end, y, width, height, GxEPD_RED);
+    display.fillRect( x, y, w_section, height, GxEPD_RED);
   }
 }
 

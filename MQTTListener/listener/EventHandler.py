@@ -3,7 +3,7 @@ import os, sys
 import datetime
 
 class EventHandler:
-    EVENT_NUM = 100
+    EVENT_NUM = 10
     P1_DEVICES = ["A", "B", "C", "D"]
     PARTICIPANTS = [P1_DEVICES]
     BUTTONS = ["A", "B"]
