@@ -36,11 +36,30 @@
 #define NUMBER_OF_BUTTONS 5
 char BUTTONS[] = {'A', 'B', 'U', 'N', 'S'};
 int presses[NUMBER_OF_BUTTONS];
+time_t debounce_time[NUMBER_OF_BUTTONS];
+const int debounce_delay = 1;
 //-------------------------------------------------//
+
+bool debounce_check(int button) {
+  time_t now = time(nullptr);
+  if ((now - debounce_time[button]) > debounce_delay) {
+    debounce_time[button] = now;
+    return true;
+  }
+  return false;
+}
+
+void  queue_button_press_A() { if (debounce_check(BUTTON_A)) presses[BUTTON_A]++;}
+void  queue_button_press_B() { if (debounce_check(BUTTON_B)) presses[BUTTON_B]++;}
+void  queue_button_press_UNDO() { if (debounce_check(BUTTON_UNDO)) presses[BUTTON_UNDO]++;}
+void  queue_button_press_NEW_LOGFILE() { if (debounce_check(BUTTON_NEW_LOGFILE)) presses[BUTTON_NEW_LOGFILE]++;}
+void  queue_button_press_SWITCH_VIS() { if (debounce_check(BUTTON_SWITCH_VIS )) presses[BUTTON_SWITCH_VIS]++;}
+
+
 
 
 void button_setup() {
-  /*pinMode(PIN_A, INPUT);
+  pinMode(PIN_A, INPUT);
   pinMode(PIN_B, INPUT);
   pinMode(PIN_UNDO, INPUT);
   pinMode(PIN_NEW_LOGFILE, INPUT);
@@ -50,7 +69,7 @@ void button_setup() {
   attachInterrupt(digitalPinToInterrupt(PIN_B), queue_button_press_B, RISING);
   attachInterrupt(digitalPinToInterrupt(PIN_UNDO), queue_button_press_UNDO, RISING);
   attachInterrupt(digitalPinToInterrupt(PIN_NEW_LOGFILE), queue_button_press_NEW_LOGFILE, RISING);
-  attachInterrupt(digitalPinToInterrupt(PIN_SWITCH_VIS), queue_button_press_SWITCH_VIS, RISING);*/
+  attachInterrupt(digitalPinToInterrupt(PIN_SWITCH_VIS), queue_button_press_SWITCH_VIS, RISING);
 }
 
 
@@ -64,9 +83,7 @@ void detect_wakeup_reason() {
     case 1  : Serial.println("Wakeup caused by external signal using RTC_IO"); break;
     case 2  : {
       Serial.println("Wakeup caused by external signal using RTC_CNTL ");
-      uint64_t wakeup_pin_mask = esp_sleep_get_ext1_wakeup_status();
-      if (wakeup_pin_mask != 0) queue_button_press(__builtin_ffsll(wakeup_pin_mask) - 1);
-      else Serial.println("Wake up from unknown GPIO");
+      queue_button_press(esp_sleep_get_ext1_wakeup_status());
       break;
     }
     case 3  : Serial.println("Wakeup caused by timer"); break;
@@ -76,58 +93,40 @@ void detect_wakeup_reason() {
   }
 }
 
-void  queue_button_press_A() { presses[BUTTON_A]++; }
-void  queue_button_press_B() { presses[BUTTON_B]++; }
-void  queue_button_press_UNDO() { presses[BUTTON_UNDO]++; }
-void  queue_button_press_NEW_LOGFILE() { presses[BUTTON_NEW_LOGFILE]++; }
-void  queue_button_press_SWITCH_VIS() { presses[BUTTON_SWITCH_VIS]++; }
 
-void queue_button_press(int pin) {
-    switch (pin)
-    {
-      case PIN_A: {
-         Serial.println("PIN_A has been pressed");
-         //notify_button_press('A');
-         queue_button_press_A();
-         break; 
-      }
-      case PIN_B: {
-         Serial.println("PIN_B has been pressed");
-         //notify_button_press('B');
-         queue_button_press_B();
-         break;
-      }
-      case PIN_UNDO: {
-         //notify_button_press('U');
-         queue_button_press_UNDO();
-         break;
-      }
-      case PIN_NEW_LOGFILE: {
-         Serial.println("PIN_NEW_LOGFILE has been pressed");
-         queue_button_press_NEW_LOGFILE();
-         //notify_button_press('N');
-         break;
-      }
-      case PIN_SWITCH_VIS:
-      {
-         Serial.println("PIN_SWITCH_VIS has been pressed");
-         //notify_button_press('S');
-         queue_button_press_SWITCH_VIS();
-         switch_visualization();
-         break;
-      }
-      default:
-        break;
-    }
+void queue_button_press(uint64_t wakeup_pin_mask) {
+  if (wakeup_pin_mask != 0) {
+    int pin = __builtin_ffsll(wakeup_pin_mask) - 1;
+  
+    if (PIN_A == pin) queue_button_press_A();
+    else if (PIN_B == pin) queue_button_press_B();
+    else if (PIN_UNDO == pin) queue_button_press_UNDO();
+    else if (PIN_NEW_LOGFILE == pin) queue_button_press_NEW_LOGFILE();
+    else if (PIN_SWITCH_VIS == pin) queue_button_press_SWITCH_VIS();
+  } else {
+    Serial.println("Wake up from unknown GPIO");
+  }
 }
+
 
 void respond_to_button_press() {
   for (int i = 0; i < NUMBER_OF_BUTTONS; i++) {
-    for (int j = 0; j < presses[i]; j++) {
+    Serial.println("RESPONDING TO " + String(i) + " which is " + String(presses[i]));
+    while (presses[i] > 0) {
+      presses[i]--;
       notify_button_press(BUTTONS[i]);
+      if (BUTTON_SWITCH_VIS == i) switch_visualization();
     }
-    presses[i] = 0;
   }
+}
 
+
+bool button_press_check() {
+  int total = 0;
+  for (int i = 0; i < NUMBER_OF_BUTTONS; i++) {
+      total += presses[i];
+  }
+  if (total > 0) return true;
+  return false;
 }
 

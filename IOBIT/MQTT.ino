@@ -32,7 +32,9 @@
  */
 
 //--------------General defines--------------------//
-#define PUBLISH_WAIT 10
+#define publish_wait 10000
+time_t last_published_data_request = 0;
+
 #define MAX_INT 2147483647
 //-------------------------------------------------//
 
@@ -87,6 +89,7 @@ void message_callback(char* topic, byte* payload, unsigned int length) {
     String type = String(topic);
     
     if (type ==  "iobits/DataResponse") {
+      Serial.println("DataResponse recieved");
       number_of_expected_messages = data_message(payload, length);
 
     } else if (type == "iobits/DataResponsePoints") {
@@ -101,18 +104,19 @@ void message_callback(char* topic, byte* payload, unsigned int length) {
 
 
 void request_data() {
-  time_t now;
-  time_t last_pub = time(nullptr) - PUBLISH_WAIT - 1;
-  
+  time_t now;  
   do {
     now = time(nullptr);
-    if (now > (last_pub + PUBLISH_WAIT)) {
+    if ((now - last_published_data_request) > publish_wait) {
+      Serial.println("REQUESTING DATA...Number of expected Messages " + String(number_of_expected_messages));
       number_of_expected_messages = MAX_INT;
       client.publish(data_request, &my_name);
-      last_pub = now;
+      delay(110);
+      last_published_data_request = now;
     }
     client.loop();
   } while (number_of_expected_messages > 0);
+  Serial.println("DATA RECEIVED");
 }
 
 
@@ -120,9 +124,11 @@ void notify_button_press(char type) {
   char time_string[30];
   time_t now = time(nullptr);
   time_to_string(now, time_string);
+
   
   char message[35] = {my_name, ',', type, ','};
   strcat(message, time_string);
+  Serial.println(" notify_button_press " + String(message));
   client.publish("iobits/ButtonPress", message);
 }
 

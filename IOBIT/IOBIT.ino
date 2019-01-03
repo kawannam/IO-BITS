@@ -39,6 +39,8 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 
+//
+
 
 //Fonts
 #include <Fonts/FreeSans7pt7b.h>
@@ -93,27 +95,40 @@ void setup() {
   Serial.begin(115200);
   delay(1000); //Take some time to open up the Serial Monitor
 
+  //Respond to wakeup cause
+  Serial.println("Detect wakeup cause");
+  delay(1000);
+  detect_wakeup_reason();
+
+  //Initiallize button interupts
+  Serial.println("Initialize Button Interupts");
+  button_setup();
+
+  setup_display();
+
   //Connecting Networks
   Serial.println("Connecting Networks");
   connect_to_wifi();
   connect_to_time_server();
   connect_to_mqtt();
+  
+  int count = 0;
 
-  //Respond to wakeup cause
-  Serial.println("Respond to wakeup cause");
-  delay(1000);
-  detect_wakeup_reason();
-
-  respond_to_button_press();
-
-  //Request Data
-  request_data();
-
-  //Updating Display
-  Serial.println("Updating Display");
-  setup_display();
-  update_vis();
-
+  do {
+    Serial.println("RESPOND TO BUTTON PRESSES");
+    respond_to_button_press();
+  
+    //Request Data
+    Serial.println("REQUEST DATA");
+    request_data();
+  
+    //Updating Display
+    Serial.println("Updating Display");
+    update_vis();
+    
+    count++;
+  } while (button_press_check());
+  
   //Enabling Wakeup
   Serial.println("Enable Wakeup");
   esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK,ESP_EXT1_WAKEUP_ANY_HIGH);
