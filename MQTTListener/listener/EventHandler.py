@@ -13,6 +13,8 @@ class EventHandler:
 
     def __init__(self):
         p = 0;
+        if not os.path.exists("META") :
+            os.makedirs("META")
         for participant in EventHandler.PARTICIPANTS:
             for device in participant:
                 p = p + 1
