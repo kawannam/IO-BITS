@@ -22,7 +22,7 @@
 #define PIN_A 32
 #define PIN_B 33
 #define PIN_UNDO 34
-#define PIN_NEW_LOGFILE 35 
+#define PIN_NEW_LOGFILE 36 
 #define PIN_SWITCH_VIS 39
 //-------------------------------------------------//
 

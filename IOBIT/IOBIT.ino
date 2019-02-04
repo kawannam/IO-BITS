@@ -82,7 +82,7 @@ struct coord {
 //-------------------------------------------------//
 
 //--------------Public Constants and Defines-------//
-#define BUTTON_PIN_BITMASK 0x8F00000000 // pins 32, 33, 34, 35, and 39 will wakeup the chip
+#define BUTTON_PIN_BITMASK 0x9700000000 // pins 32, 33, 34, 35, and 39 will wakeup the chip
 //-------------------------------------------------//
 
 //--------------Public Variables-------------------//
