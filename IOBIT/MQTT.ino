@@ -123,12 +123,7 @@ void request_data() {
 
 void notify_button_press(char type) {
   char time_string[30];
-  time_t now = time(nullptr);
-  time_to_string(now, time_string);
-
-  
   char message[35] = {my_name, ',', type, ','};
-  strcat(message, time_string);
   Serial.println(" notify_button_press " + String(message));
   client.publish("iobits/ButtonPress", message);
 }

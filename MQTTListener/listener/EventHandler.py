@@ -45,10 +45,10 @@ class EventHandler:
         print("BUTTON PRESS EVENT")
         if is_log:
             print("LOG {} BUTTON PRESSED".format(fields[1]))
-            with open("{}.csv".format(fields[0]), "a") as file:
+            with open("DATA/{}.csv".format(fields[0]), "a") as file:
                 file.write("{},{}\n".format(fields[1], timestamp))
         else:
-            with open("META/{}.csv".format(fields[0]), "a") as file:
+            with open("META_DATA/{}.csv".format(fields[0]), "a") as file:
                 file.write("{},{}\n".format(fields[1], timestamp))
             if fields[1] == "U":
                 print("UNDO BUTTON PRESSED")
@@ -76,10 +76,10 @@ class EventHandler:
     def data_request_event(self, message, server):
         fields = message.split(",")
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        with open("{}.csv".format(fields[0]), "r") as file:
+        with open("DATA/{}.csv".format(fields[0]), "r") as file:
             press_data = self.count_button_presses(file)
         
-        with open("{}.csv".format(fields[0]), "r") as file:
+        with open("DATA/{}.csv".format(fields[0]), "r") as file:
             pts = EventHandler.last_n_points(fields[0], file, EventHandler.EVENT_NUM)
 
         counts = ','.join(str(c) for c in press_data)
@@ -96,7 +96,7 @@ class EventHandler:
         print("UNDO REQUEST")
         try:
             fields = message.split(",")
-            with open("{}.csv".format(fields[0]), "r+") as file:
+            with open("DATA/{}.csv".format(fields[0]), "r+") as file:
                 lines = file.readlines()
                 last_line = lines[-1].split(",")
                 lines = lines[:-1]
@@ -110,9 +110,9 @@ class EventHandler:
     def newfile_request_event(self, message):
         fields = message.split(",")
         ts = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        os.rename("{}.csv".format(fields[0]), "{}_{}.csv".format(fields[0],ts))
+        os.rename("DATA/{}.csv".format(fields[0]), "DATA/{}_{}.csv".format(fields[0],ts))
         try:
-            file = open("{}.csv".format(fields[0]), "x")
+            file = open("DATA/{}.csv".format(fields[0]), "x")
             file.close()
         except FileExistsError:
             print("File was not restarted correctly")
