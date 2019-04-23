@@ -110,14 +110,16 @@ void queue_button_press(uint64_t wakeup_pin_mask) {
 
 
 void respond_to_button_press() {
+  Serial.println("A | B | U | N | S |");
   for (int i = 0; i < NUMBER_OF_BUTTONS; i++) {
-    Serial.println("RESPONDING TO " + String(i) + " which is " + String(presses[i]));
+    Serial.print(String(presses[i]) + " | ");
     while (presses[i] > 0) {
       presses[i]--;
       notify_button_press(BUTTONS[i]);
       if (BUTTON_SWITCH_VIS == i) switch_visualization();
     }
   }
+  Serial.println();
 }
 
 

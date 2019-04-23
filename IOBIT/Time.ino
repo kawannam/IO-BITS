@@ -19,7 +19,7 @@
  * library to handle timezones/daylight savings. Not sure this handles it
  */
 
-void connect_to_time_server() {
+/*void connect_to_time_server() {
   configTime(timezone, dst, "pool.ntp.org");  
   setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 0);  
   while(time(nullptr) <= 100000) {
@@ -27,7 +27,7 @@ void connect_to_time_server() {
         delay(1000);
       }
   Serial.println("Connected");
-}
+}*/
 
 void time_to_string_display(time_t timestamp, char time_string[]) {
   struct tm p_tm = *localtime(&timestamp);

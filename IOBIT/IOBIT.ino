@@ -31,6 +31,9 @@
 //Display
 #include <GxEPD.h>
 #include <GxIO/GxIO_SPI/GxIO_SPI.h>
+#include <GxEPD2_32_BW.h>
+#include <GxEPD2_32_3C.h>
+
 
 //Time
 #include <time.h>
@@ -55,11 +58,11 @@
 
 //---------------Customization Info----------------//
 //Indicate the exact screen type
-#define DISPLAY_TYPE '1.5bwy'
+#define DISPLAY_TYPE '1.5bw'
 
 //Internet credentials 
-const char* ssid = "***";
-const char* password = "***";
+const char* ssid = "iobitsNW";
+const char* password = "iobits123#";
 
 
 //Device specific char
@@ -68,6 +71,8 @@ char my_name = 'A';
 //Set Timezone - Currently set for MST
 const int timezone = -7 * 3600;
 const int dst = 0;
+time_t current_time;
+struct tm current_time_tm;
 //-------------------------------------------------//
 
 //--------------Data Structures--------------------//
@@ -78,6 +83,11 @@ struct data_point {
 struct coord {
   int x;
   int y;
+};
+struct streaks {
+  int A;
+  int B;
+  int Total;
 };
 //-------------------------------------------------//
 
@@ -95,6 +105,8 @@ void setup() {
   Serial.begin(115200);
   delay(1000); //Take some time to open up the Serial Monitor
 
+  
+
   //Respond to wakeup cause
   Serial.println("Detect wakeup cause");
   delay(1000);
@@ -109,7 +121,6 @@ void setup() {
   //Connecting Networks
   Serial.println("Connecting Networks");
   connect_to_wifi();
-  connect_to_time_server();
   connect_to_mqtt();
   
   int count = 0;

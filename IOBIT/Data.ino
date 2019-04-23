@@ -20,6 +20,13 @@
 
 //--------------Data------------------------------//
 #define MAX_NUMBER_OF_DATA_POINTS 100
+#define MAX_NUMBER_OF_DAYS 500
+#define HOURS_IN_A_DAY 24
+#define DAYS_IN_A_WEEK 7
+#define DAYS_IN_A_YEAR 365
+
+#define NUMBER_OF_INPUTS 2 //A and B
+
 data_point points[MAX_NUMBER_OF_DATA_POINTS];
 int count_A = 0;
 int count_B = 0;
@@ -40,6 +47,9 @@ int data_message(byte* payload, unsigned int length) {
   count_B = atoi(str);
   str = strtok(NULL, ",");
   current_number_of_points = atoi(str);
+  str = strtok(NULL, ",");
+  string_to_time(str, &current_time);
+  current_time_tm = *localtime(&current_time);
   return current_number_of_points;
 }
 

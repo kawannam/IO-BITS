@@ -12,15 +12,13 @@ void dotted_week() {
   int checking_yday, checking_wday, colour;
   display.fillScreen(GxEPD_WHITE);
 
-  time_t now = time(nullptr);
-  struct tm now_tm = *localtime(&now);
   struct tm point_tm;
 
   for(int i = 0; i < current_number_of_points; i++) {
     point_tm = *localtime(&points[i].timestamp);
-    if (now_tm.tm_wday >= (now_tm.tm_yday - point_tm.tm_yday)) { 
+    if (current_time_tm.tm_wday >= (current_time_tm.tm_yday - point_tm.tm_yday)) { 
       if (points[i].button == 'A') colour = GxEPD_BLACK;
-      else colour = GxEPD_RED;
+      else colour = GxCOLOUR;
       spot = dotted_week_get_spot(point_tm.tm_hour, point_tm.tm_wday); 
       display.fillCircle(spot.x, spot.y, dot_rad, colour); 
     }
@@ -29,7 +27,7 @@ void dotted_week() {
   for (int i = 0; i <= HOURS_IN_A_DAY; i++) {
     for(int j = 0; j < DAYS_IN_A_WEEK; j++) {
       spot = dotted_week_get_spot(i, j);
-      if ((i == now_tm.tm_hour) && (j == now_tm.tm_wday)) {
+      if ((i == current_time_tm.tm_hour) && (j == current_time_tm.tm_wday)) {
         display.drawRect(spot.x - dot_rad, spot.y - dot_rad, dot_diam + 1, dot_diam + 1, GxEPD_BLACK);
       } else {
         display.drawCircle(spot.x, spot.y, dot_rad, GxEPD_BLACK);
@@ -38,7 +36,7 @@ void dotted_week() {
   }
 
   display.setFont(f7b);
-  display.setTextColor(GxEPD_RED);
+  display.setTextColor(GxCOLOUR);
   uint16_t w, h;
 
   get_text_dimensions("0", f7b, &w, &h);

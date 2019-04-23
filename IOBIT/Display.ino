@@ -40,22 +40,32 @@
 //---------------E-Paper Display Type--------------//
 // Configs/Includes based on which screen we are using
 
+#if DISPLAY_TYPE == '1.5bw'
+#include <GxGDEP015OC1/GxGDEP015OC1.h>
+#define DISPLAY_HEIGHT 200
+#define DISPLAY_WIDTH 200
+#define GxCOLOUR GxEPD_BLACK 
+const String display_type = "1.5bwy";
+#endif
 #if DISPLAY_TYPE == '1.5bwy'
 #include <GxGDEW0154Z17/GxGDEW0154Z17.h>
 #define DISPLAY_HEIGHT 152
 #define DISPLAY_WIDTH 152
+#define GxCOLOUR GxEPD_RED
 const String display_type = "1.5bwy";
 #endif
 #if DISPLAY_TYPE == '1.5bwr'
 #include <GxGDEW0154Z04/GxGDEW0154Z04.h>
 #define DISPLAY_HEIGHT 200
 #define DISPLAY_WIDTH 200
+#define GxCOLOUR GxEPD_RED
 const String display_type = "1.5bwr";
 #endif
 #if DISPLAY_TYPE == '4.2'
 #include <GxGDEW042Z15/GxGDEW042Z15.h>
 #define DISPLAY_HEIGHT 300
 #define DISPLAY_WIDTH 400
+#define GxCOLOUR GxEPD_RED
 const String display_type = "4.2";
 #endif
 //-------------------------------------------------//
@@ -84,14 +94,10 @@ const GFXfont* f36b = &FreeSansBold36pt7b;
 //-------------------------------------------------//
 
 //---------------General Visualization Defines-----//
-#define HOURS_IN_A_DAY 24
-#define DAYS_IN_A_WEEK 7
-#define DAYS_IN_A_YEAR 365
-
 #define NUMBER_OF_VIS_OPTIONS 5
 
 char days[7] = {'U', 'M', 'T', 'W', 'R', 'F', 'S'};
-RTC_DATA_ATTR int vis_option = 4;
+RTC_DATA_ATTR int vis_option = 3;
 const int space_for_titles = 15;
 //-------------------------------------------------//
 
@@ -110,30 +116,36 @@ void switch_visualization() {
 
 
 void update_vis() {
-    switch (vis_option) {
-      case 0: 
-        Serial.println("Displaying: Dotted Week Visualization");
-        dotted_week();
-        break;
-      case 1:
-        Serial.println("Displaying: Tug of War Visualization");
-        tug_of_war();
-        break;
-      case 2:
-        Serial.println("Displaying: Plain Text Visualization");
-        plain_text();
-        break;
-      case 3:
-        Serial.println("Displaying: Streaks and Valleys Visualization");
-        streaks_and_valleys();
-        break;
-      default:
-        Serial.println("Displaying: Stacked Bars Visualization");
-        stacked_bars();
-        break;
+    if ( current_number_of_points == 0 ) {
+      no_data_display();
+    } else {
+      switch (vis_option) {
+        case 0: 
+          Serial.println("Displaying: Dotted Week Visualization");
+          dotted_week();
+          break;
+        case 1:
+          Serial.println("Displaying: Tug of War Visualization");
+          tug_of_war();
+          break;
+        case 2:
+          Serial.println("Displaying: Plain Text Visualization");
+          plain_text();
+          break;
+        case 3:
+          Serial.println("Displaying: Streaks and Valleys Visualization");
+          streaks_and_valleys();
+          break;
+        default:
+          Serial.println("Displaying: Stacked Bars Visualization");
+          stacked_bars();
+          break;
+      }
     }
+    Serial.println("Sending update command to screen");
     display.update();
     delay(100);
+    Serial.println("Update command returned");
 }
 
 

@@ -13,11 +13,8 @@ void stacked_bars() {
   struct tm start_time;
   struct tm end_time;
 
-  time_t now = time(nullptr);
-  struct tm now_tm = *localtime(&now);
-
   display.fillScreen(GxEPD_WHITE);
-  display.setTextColor(GxEPD_RED);
+  display.setTextColor(GxCOLOUR);
   display.setFont();
 
   get_text_dimensions("W", NULL, &w, &h);
@@ -26,17 +23,17 @@ void stacked_bars() {
     start_time = *localtime(&points[i-1].timestamp);
     end_time = *localtime(&points[i].timestamp);
 
-    if (now_tm.tm_wday >= (start_time.tm_yday - end_time.tm_yday)) {
+    if (current_time_tm.tm_wday >= (start_time.tm_yday - end_time.tm_yday)) {
       draw_time_interval(start_time, end_time);
     }
   }
 
-  x = (now_tm.tm_wday * w_section) + ((w_section - NOW_BOX_SIDE)/2) + space_for_titles;
-  y = (now_tm.tm_hour * h_section) + ((h_section - NOW_BOX_SIDE)/2) + space_for_titles;
+  x = (current_time_tm.tm_wday * w_section) + ((w_section - NOW_BOX_SIDE)/2) + space_for_titles;
+  y = (current_time_tm.tm_hour * h_section) + ((h_section - NOW_BOX_SIDE)/2) + space_for_titles;
   if (((count_A + count_B) % 2) != 0) {
     start_time = *(localtime(&points[current_number_of_points - 1].timestamp));
-    draw_time_interval(start_time, now_tm);
-    display.fillRect(x, y, NOW_BOX_SIDE, NOW_BOX_SIDE, GxEPD_RED);
+    draw_time_interval(start_time, current_time_tm);
+    display.fillRect(x, y, NOW_BOX_SIDE, NOW_BOX_SIDE, GxCOLOUR);
   }
   display.drawRect(x, y, NOW_BOX_SIDE, NOW_BOX_SIDE, GxEPD_BLACK);
   
@@ -64,22 +61,22 @@ void draw_time_interval(tm start_time, tm end_time) {
 
   if (start_time.tm_yday == end_time.tm_yday) {
     height = (end_time.tm_hour - start_time.tm_hour)* h_section;
-    display.fillRect( x, y, w_section, height, GxEPD_RED);
+    display.fillRect( x, y, w_section, height, GxCOLOUR);
         
   } else {
     height = ((HOURS_IN_A_DAY - start_time.tm_hour)*h_section);
-    display.fillRect( x, y, w_section, height, GxEPD_RED);
+    display.fillRect( x, y, w_section, height, GxCOLOUR);
 
     y = space_for_titles;
     height = (HOURS_IN_A_DAY*h_section);
     for (int i = 1; i < end_time.tm_yday - start_time.tm_yday; i++) {
       x = ((start_time.tm_wday + i)*w_section) + space_for_titles;    
-      display.fillRect(x, y, w_section, height, GxEPD_RED);
+      display.fillRect(x, y, w_section, height, GxCOLOUR);
     }
     
     x = (end_time.tm_wday * w_section) + space_for_titles;
     height = (end_time.tm_hour)* h_section;
-    display.fillRect( x, y, w_section, height, GxEPD_RED);
+    display.fillRect( x, y, w_section, height, GxCOLOUR);
   }
 }
 

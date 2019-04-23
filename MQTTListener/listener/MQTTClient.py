@@ -20,10 +20,8 @@ class MQTTClient:
 
     def on_message(self, cdata, userdata, msg):
         if msg.topic == MQTTClient.PRESS:
-            print("Received PRESS event: {}".format(msg.payload))
             self.handler.button_press_event(msg.payload.decode("utf-8"))
         elif msg.topic == MQTTClient.REQUEST:
-            print("Received REQUEST event: {}".format(msg.payload))
             self.handler.data_request_event(msg.payload.decode("utf-8"), self.server)
         else:
             print("UNKNOWN MESSAGE")

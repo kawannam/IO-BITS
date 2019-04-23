@@ -21,9 +21,8 @@ void get_text_dimensions(String string_to_display, const GFXfont* font, uint16_t
 void no_data_display() {
   uint16_t w, h;
   const GFXfont* font = f18b;
-  String no_data = "No Data";
+  String no_data = "Start Logging!";
   display.fillScreen(GxEPD_WHITE);
   get_text_dimensions(no_data, font, &w, &h);
   display_text_adv(no_data, GxEPD_BLACK, font, (DISPLAY_WIDTH/2) - (w/2), (DISPLAY_HEIGHT/2));
 }
-

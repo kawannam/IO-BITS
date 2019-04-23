@@ -13,15 +13,17 @@ class EventHandler:
 
     def __init__(self):
         p = 0;
-        if not os.path.exists("META") :
-            os.makedirs("META")
+        if not os.path.exists("META_DATA") :
+            os.makedirs("META_DATA")
+        if not os.path.exists("DATA") :
+            os.makedirs("DATA")
         for participant in EventHandler.PARTICIPANTS:
             for device in participant:
                 p = p + 1
                 try:
-                    file = open("{}.csv".format(device), "x")
+                    file = open("DATA/{}.csv".format(device), "x")
                     file.close()
-                    meta_file = open("META/{}.csv".format(device), "x")
+                    meta_file = open("META_DATA/{}.csv".format(device), "x")
                     meta_file.close()
                 except FileExistsError:
                     continue
@@ -37,15 +39,17 @@ class EventHandler:
 
     def button_press_event(self, message):
         fields = message.split(",")
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
         is_log = fields[1] in self.BUTTONS
         print("BUTTON PRESS EVENT")
         if is_log:
-            print("LOG BUTTON PRESSED")
+            print("LOG {} BUTTON PRESSED".format(fields[1]))
             with open("{}.csv".format(fields[0]), "a") as file:
-                file.write("{}\n".format(",".join(fields[1:])))
+                file.write("{},{}\n".format(fields[1], timestamp))
         else:
             with open("META/{}.csv".format(fields[0]), "a") as file:
-                file.write("{}\n".format(",".join(fields[1:])))
+                file.write("{},{}\n".format(fields[1], timestamp))
             if fields[1] == "U":
                 print("UNDO BUTTON PRESSED")
                 self.undo_request_event(message)
@@ -56,23 +60,22 @@ class EventHandler:
                 print("SWITCH BUTTON PRESSED")
 
 
-
     def count_button_presses(self, file):
         press_data = [0] * len(self.BUTTONS)
 
         for line in file:
             i = 0;
             for button in self.BUTTONS:
-                print("Button {} and Line {}".format(button, line))
                 if (button == line[0]):
                     press_data[i] += 1
                     continue
                 i += 1
-        print("COUNT BUTTON PRESSES {}".format(len(press_data)))
         return press_data
 
+            
     def data_request_event(self, message, server):
         fields = message.split(",")
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         with open("{}.csv".format(fields[0]), "r") as file:
             press_data = self.count_button_presses(file)
         
@@ -80,9 +83,7 @@ class EventHandler:
             pts = EventHandler.last_n_points(fields[0], file, EventHandler.EVENT_NUM)
 
         counts = ','.join(str(c) for c in press_data)
-        print(counts)
-        test = ",".join([fields[0], counts,str(len(pts))]).rstrip(",")
-        print(test)
+        test = ",".join([fields[0], counts,str(len(pts)), timestamp]).rstrip(",")
         publish.single(EventHandler.RESPONSE,
                        payload= test,
                        hostname=server)
@@ -92,13 +93,18 @@ class EventHandler:
 
 
     def undo_request_event(self, message):
-        fields = message.split(",")
-        with open("{}.csv".format(fields[0]), "r+") as file:
-            lines = file.readlines()
-            last_line = lines[-1].split(",")
-            lines = lines[:-1]
-            file.writelines([item for item in lines])
         print("UNDO REQUEST")
+        try:
+            fields = message.split(",")
+            with open("{}.csv".format(fields[0]), "r+") as file:
+                lines = file.readlines()
+                last_line = lines[-1].split(",")
+                lines = lines[:-1]
+                file.truncate(0)
+                file.writelines([item for item in lines])
+        except FileExistsError:
+            print("File was not restarted correctly")
+
 
                         
     def newfile_request_event(self, message):

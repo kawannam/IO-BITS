@@ -40,7 +40,7 @@ time_t last_published_data_request = 0;
 
 //--------------MQTT Consts------------------------//
 const char* device_id = "IOBITClient" + my_name;
-const char* mqttServer = "test.mosquitto.org";
+const char* mqttServer = "192.168.4.1";
 const int mqttPort = 1883;
 //-------------------------------------------------//
 
@@ -108,6 +108,7 @@ void request_data() {
   do {
     now = time(nullptr);
     if ((now - last_published_data_request) > publish_wait) {
+      Serial.println(now);
       Serial.println("REQUESTING DATA...Number of expected Messages " + String(number_of_expected_messages));
       number_of_expected_messages = MAX_INT;
       client.publish(data_request, &my_name);
