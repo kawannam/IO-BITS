@@ -27,10 +27,7 @@
 
 #define NUMBER_OF_INPUTS 2 //A and B
 
-data_point points[MAX_NUMBER_OF_DATA_POINTS];
-int count_A = 0;
-int count_B = 0;
-int current_number_of_points = 0;
+
 //-------------------------------------------------//
 
 
@@ -48,8 +45,12 @@ int data_message(byte* payload, unsigned int length) {
   str = strtok(NULL, ",");
   current_number_of_points = atoi(str);
   str = strtok(NULL, ",");
-  string_to_time(str, &current_time);
-  current_time_tm = *localtime(&current_time);
+
+  char time_string[30];
+  strncpy(time_string, str, 30);
+  
+  string_to_time(time_string, &current_time_tm);
+  
   return current_number_of_points;
 }
 
@@ -57,15 +58,19 @@ void data_response_message_points(byte* payload, unsigned int length, int number
   if (length == 0) return;
   char *str;
   char pay[length];
-  time_t the_time;
-  
+  struct tm the_time;
+
   memcpy(pay, payload, length);
 
-  str = strtok(pay, ",");
+  str = strtok(pay, ",");  
   str = strtok(NULL, ",");
-  char button = *str;
+  char button = str[0];
+
   str = strtok(NULL, ",");
-  string_to_time(str, &the_time);
+  char time_string[30];
+  strncpy(time_string, str, 30);
+  string_to_time(time_string, &the_time);
+  
   points[number_of_expected_messages] = (data_point) { button, the_time};
 }
 

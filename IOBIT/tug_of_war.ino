@@ -17,11 +17,6 @@ void tug_of_war() {
 
     Serial.println("Count " + String(count));
     
-    if (count == 0) {
-      no_data_display();
-      return;
-    }
-
       ratio_A = ((count_A * DISPLAY_WIDTH) / count);           
       display.fillScreen(GxEPD_WHITE);
       display.fillRect(0, 0, ratio_A, DISPLAY_HEIGHT, GxCOLOUR);

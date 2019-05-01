@@ -25,8 +25,9 @@ void plain_text() {
   display_text_adv(String(count_B), GxEPD_WHITE, large_font, (DISPLAY_WIDTH - l_w - EDGE_BUFFER - EDGE_BUFFER), (DISPLAY_HEIGHT - s_h - s_h - EDGE_BUFFER));
 }
 
-
 String get_last_instance_timestamp(char button) {
+  Serial.println("Number of points: " + current_number_of_points);
+  
   char buff[30];
   for (int i = current_number_of_points; i >= 0; i--) {
     time_to_string(points[i].timestamp, buff);

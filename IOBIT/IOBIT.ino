@@ -61,9 +61,8 @@
 #define DISPLAY_TYPE '1.5bw'
 
 //Internet credentials 
-const char* ssid = "iobitsNW";
-const char* password = "iobits123#";
-
+const char* ssid = "****";
+const char* password = "*****";
 
 //Device specific char
 char my_name = 'A';
@@ -71,14 +70,14 @@ char my_name = 'A';
 //Set Timezone - Currently set for MST
 const int timezone = -7 * 3600;
 const int dst = 0;
-time_t current_time;
+//time_t current_time;
 struct tm current_time_tm;
 //-------------------------------------------------//
 
 //--------------Data Structures--------------------//
 struct data_point {
   char button;
-  time_t timestamp;
+  struct tm timestamp;
 };
 struct coord {
   int x;
@@ -93,23 +92,35 @@ struct streaks {
 
 //--------------Public Constants and Defines-------//
 #define BUTTON_PIN_BITMASK 0x9700000000 // pins 32, 33, 34, 35, and 39 will wakeup the chip
+//#define STATUS_LIGHT 27
+#define STATUS_LIGHT 13
 //-------------------------------------------------//
 
 //--------------Public Variables-------------------//
-
+bool connected_to_wifi = false;
+bool connected_to_mqtt = false;
 
 //-------------------------------------------------//
 
+//Temp
+data_point points[100];
+int count_A = 0;
+int count_B = 0;
+int current_number_of_points = 0;
+
 
 void setup() {
+  pinMode(STATUS_LIGHT, OUTPUT);
+  digitalWrite(STATUS_LIGHT, HIGH);
+  
   Serial.begin(115200);
-  delay(1000); //Take some time to open up the Serial Monitor
+  delay(100); //Take some time to open up the Serial Monitor
 
+  digitalWrite(STATUS_LIGHT, LOW);
   
 
   //Respond to wakeup cause
   Serial.println("Detect wakeup cause");
-  delay(1000);
   detect_wakeup_reason();
 
   //Initiallize button interupts
@@ -120,32 +131,39 @@ void setup() {
 
   //Connecting Networks
   Serial.println("Connecting Networks");
-  connect_to_wifi();
-  connect_to_mqtt();
+  bool connected = connect_to_wifi();
   
-  int count = 0;
-
-  do {
-    Serial.println("RESPOND TO BUTTON PRESSES");
-    respond_to_button_press();
-  
-    //Request Data
-    Serial.println("REQUEST DATA");
-    request_data();
-  
-    //Updating Display
-    Serial.println("Updating Display");
-    update_vis();
+  if (connected) {
+    connect_to_mqtt();
     
-    count++;
-  } while (button_press_check());
-  
+    digitalWrite(STATUS_LIGHT, HIGH);
+    do {
+      Serial.println("RESPOND TO BUTTON PRESSES");
+      respond_to_button_press();
+    
+      //Request Data
+      Serial.println("REQUEST DATA");
+      request_data();
+
+      char buff[30];
+      for ( int i = 0; i < 100; i++) {
+        time_to_string(points[i].timestamp, buff);
+        Serial.println("Index: " + String(i) + " Button " + String(points[i].button) + " Time: " + buff);
+      }
+    
+      //Updating Display
+      Serial.println("Updating Display");
+      update_vis();
+      
+    } while (button_press_check());
+  }
   //Enabling Wakeup
   Serial.println("Enable Wakeup");
   esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK,ESP_EXT1_WAKEUP_ANY_HIGH);
 
    //Going to sleep now
   Serial.println("Going to sleep now");
+  digitalWrite(STATUS_LIGHT, LOW);
   delay(1000);
   esp_deep_sleep_start();
   Serial.println("This will never be printed");

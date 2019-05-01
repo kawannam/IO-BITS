@@ -20,8 +20,8 @@ void stacked_bars() {
   get_text_dimensions("W", NULL, &w, &h);
 
   for (int i = 1; i < current_number_of_points; i = i+2) {
-    start_time = *localtime(&points[i-1].timestamp);
-    end_time = *localtime(&points[i].timestamp);
+    start_time = points[i-1].timestamp;
+    end_time = points[i].timestamp;
 
     if (current_time_tm.tm_wday >= (start_time.tm_yday - end_time.tm_yday)) {
       draw_time_interval(start_time, end_time);
@@ -31,7 +31,7 @@ void stacked_bars() {
   x = (current_time_tm.tm_wday * w_section) + ((w_section - NOW_BOX_SIDE)/2) + space_for_titles;
   y = (current_time_tm.tm_hour * h_section) + ((h_section - NOW_BOX_SIDE)/2) + space_for_titles;
   if (((count_A + count_B) % 2) != 0) {
-    start_time = *(localtime(&points[current_number_of_points - 1].timestamp));
+    start_time = points[current_number_of_points - 1].timestamp;
     draw_time_interval(start_time, current_time_tm);
     display.fillRect(x, y, NOW_BOX_SIDE, NOW_BOX_SIDE, GxCOLOUR);
   }

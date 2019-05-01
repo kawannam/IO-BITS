@@ -29,13 +29,17 @@
   Serial.println("Connected");
 }*/
 
-void time_to_string_display(time_t timestamp, char time_string[]) {
+/*void time_to_string_display(time_t timestamp, char time_string[]) {
   struct tm p_tm = *localtime(&timestamp);
+  p_tm.tm_year += 1900;
+  p_tm.tm_mon += 1;
   strftime(time_string, 30, "%H:%M %b %e '%y", &p_tm);
 }
 
 void time_to_string(time_t timestamp, char time_string[]) {
   struct tm p_tm = *localtime(&timestamp);
+  p_tm.tm_year += 1900;
+  p_tm.tm_mon += 1;
   strftime(time_string, 30, "%Y-%m-%d %H:%M:%S", &p_tm);
 }
 
@@ -43,5 +47,17 @@ void string_to_time(char time_string[], time_t* timestamp) {
     struct tm p_tm;
     strptime(time_string, "%Y-%m-%d %H:%M:%S", &p_tm);
     *timestamp = mktime(&p_tm);  // t is now your desired time_t
+}*/
+
+void time_to_string_display(struct tm p_tm, char time_string[]) {
+  strftime(time_string, 30, "%H:%M %b %e '%y", &p_tm);
+}
+
+void time_to_string(struct tm p_tm, char time_string[]) {
+  strftime(time_string, 30, "%Y-%m-%d %H:%M:%S", &p_tm);
+}
+
+void string_to_time(char time_string[], struct tm* p_tm) {
+    strptime(time_string, "%Y-%m-%d %H:%M:%S", p_tm);
 }
 

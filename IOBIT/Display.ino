@@ -109,15 +109,13 @@ void setup_display() {
   }
 }
 
-
 void switch_visualization() {
   vis_option = (vis_option + 1) % NUMBER_OF_VIS_OPTIONS;
 }
 
-
 void update_vis() {
     if ( current_number_of_points == 0 ) {
-      no_data_display();
+      display_error("No data 2\ndisplay -\nStart \nLogging!", f18b);
     } else {
       switch (vis_option) {
         case 0: 
@@ -157,9 +155,6 @@ void display_error(const char error[], const GFXfont* f)
   display.setCursor(0, 0);
   display.println();
   display.println(error);
+  display.update();
 }
-
-
-
-
 

@@ -33,14 +33,14 @@
 
 //--------------General defines--------------------//
 #define publish_wait 10000
-time_t last_published_data_request = 0;
+time_t last_published_data_request = publish_wait * (-1);
 
 #define MAX_INT 2147483647
 //-------------------------------------------------//
 
 //--------------MQTT Consts------------------------//
 const char* device_id = "IOBITClient" + my_name;
-const char* mqttServer = "192.168.4.1";
+const char* mqttServer = "test.mosquitto.org";
 const int mqttPort = 1883;
 //-------------------------------------------------//
 
@@ -64,14 +64,17 @@ void connect_to_mqtt() {
   client.setServer(mqttServer, mqttPort);
   WiFi.mode(WIFI_STA);
   while (!client.connected()) {
+    digitalWrite(STATUS_LIGHT, HIGH);
     Serial.println("Connecting to MQTT...");
  
     if (client.connect(device_id)) {
+      digitalWrite(STATUS_LIGHT, LOW);
       Serial.println("connected");
     }
     else {
       Serial.println("failed with state ");
       Serial.print(client.state());
+      digitalWrite(STATUS_LIGHT, LOW);
       delay(2000);
     }
   }
@@ -84,13 +87,13 @@ void connect_to_mqtt() {
 
 void message_callback(char* topic, byte* payload, unsigned int length) {
   char device = char(payload[0]);
-  
   if (device == my_name) {
     String type = String(topic);
     
     if (type ==  "iobits/DataResponse") {
-      Serial.println("DataResponse recieved");
+      Serial.println("DataResponse recieved, length: " + String(length));
       number_of_expected_messages = data_message(payload, length);
+      Serial.println("Expected Updated to: " + String(number_of_expected_messages));
 
     } else if (type == "iobits/DataResponsePoints") {
       number_of_expected_messages = number_of_expected_messages - 1;
@@ -106,12 +109,13 @@ void message_callback(char* topic, byte* payload, unsigned int length) {
 void request_data() {
   time_t now;  
   do {
+    digitalWrite(STATUS_LIGHT, HIGH);
     now = time(nullptr);
-    if ((now - last_published_data_request) > publish_wait) {
-      Serial.println(now);
-      Serial.println("REQUESTING DATA...Number of expected Messages " + String(number_of_expected_messages));
-      number_of_expected_messages = MAX_INT;
+    if ((now - last_published_data_request) > publish_wait) {      
+      Serial.println("REQUESTING DATA...");
+      number_of_expected_messages = 99999;
       client.publish(data_request, &my_name);
+      digitalWrite(STATUS_LIGHT, LOW);
       delay(110);
       last_published_data_request = now;
     }
@@ -127,12 +131,4 @@ void notify_button_press(char type) {
   Serial.println(" notify_button_press " + String(message));
   client.publish("iobits/ButtonPress", message);
 }
-
-
-
-
-
-
-
-
 

@@ -15,7 +15,7 @@ void dotted_week() {
   struct tm point_tm;
 
   for(int i = 0; i < current_number_of_points; i++) {
-    point_tm = *localtime(&points[i].timestamp);
+    point_tm = points[i].timestamp;
     if (current_time_tm.tm_wday >= (current_time_tm.tm_yday - point_tm.tm_yday)) { 
       if (points[i].button == 'A') colour = GxEPD_BLACK;
       else colour = GxCOLOUR;

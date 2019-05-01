@@ -4,6 +4,8 @@
  * a row you miss (to a max of 7)
  */
 
+ #define LINE_WIDTH 10
+
 void streaks_and_valleys() {
     uint16_t w, h;
     int streak, chance_threshold;
@@ -11,14 +13,12 @@ void streaks_and_valleys() {
     randomSeed(analogRead(0));
 
     struct streaks my_streaks;
-    bool days[3][MAX_NUMBER_OF_DAYS];
+    int days[3][MAX_NUMBER_OF_DAYS];
 
     
     get_streak(&my_streaks, days);
 
     streak = my_streaks.Total;
-    Serial.println(String(my_streaks.Total));
-    Serial.println(streak);
 
     display.fillScreen(GxEPD_WHITE);
     if (streak < 0) {
@@ -31,14 +31,24 @@ void streaks_and_valleys() {
       }
     }
     else {
+      int line_height = 0;
+      int line_height_offset = 0;
       for (int i = 0; i < streak; i++) {
-        for (int j = 0; j < i + 1; j++)  {
-          if (days[0][i]) {
-            display.drawLine(0, i + 1, DISPLAY_WIDTH, i + 1, GxEPD_BLACK);
-          } else if (days[1][i]) {
-            display.drawLine(0, i + 1, DISPLAY_WIDTH, i + 1, GxEPD_BLACK);
-          } else {
-           display.drawLine(0, i + 1, DISPLAY_WIDTH, i + 1, GxEPD_BLACK);
+            line_height_offset = DISPLAY_HEIGHT - ((streak-i-1)*2*LINE_WIDTH);
+            
+            
+        for (int j = 0; j < LINE_WIDTH; j++)  {
+          line_height = line_height_offset - j;          
+          if (days[A_INDEX][i] > 0 && days[B_INDEX][i] > 0) {
+            display.drawLine(0, line_height, DISPLAY_WIDTH, line_height, GxEPD_BLACK);
+          } else if (days[A_INDEX][i] > 0) {
+            for (int k = 0; k < DISPLAY_WIDTH; k += (LINE_WIDTH*2)) {
+              display.drawLine(k, line_height, k+LINE_WIDTH, line_height, GxEPD_BLACK);
+            }
+          } else if (days[B_INDEX][i] > 0) {
+            for (int k = 0; k < DISPLAY_WIDTH; k += (LINE_WIDTH*3)) {
+              display.drawLine(k, line_height, k+(2*LINE_WIDTH), line_height, GxEPD_BLACK);
+            }
           }
         }
       }
