@@ -8,7 +8,6 @@
  * Note to Kendra - write a wifi deconstructor
  * 
  */
-#define MAX_NUMBER_OF_CONNECTION_TRIES 10
  
 bool connect_to_wifi() {
   WiFi.begin(ssid, password);

@@ -28,11 +28,14 @@ void dotted_week() {
     for(int j = 0; j < DAYS_IN_A_WEEK; j++) {
       spot = dotted_week_get_spot(i, j);
       if ((i == current_time_tm.tm_hour) && (j == current_time_tm.tm_wday)) {
-        display.drawRect(spot.x - dot_rad, spot.y - dot_rad, dot_diam + 1, dot_diam + 1, GxEPD_BLACK);
-      } else {
+        draw_plus(spot.x - dot_rad, spot.y - dot_rad, dot_diam + 1, dot_diam + 1);
+        //display.drawRect(spot.x - dot_rad, spot.y - dot_rad, dot_diam + 1, dot_diam + 1, GxEPD_BLACK);
+      } /*else {
         display.drawCircle(spot.x, spot.y, dot_rad, GxEPD_BLACK);
-      }
+      }*/
+      display.drawLine(spot.x, 0, spot.x, DISPLAY_HEIGHT, GxEPD_BLACK);
     }
+    
   }
 
   display.setFont(f7b);

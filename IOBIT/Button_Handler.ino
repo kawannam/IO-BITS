@@ -55,9 +55,6 @@ void  queue_button_press_UNDO() { if (debounce_check(BUTTON_UNDO)) presses[BUTTO
 void  queue_button_press_NEW_LOGFILE() { if (debounce_check(BUTTON_NEW_LOGFILE)) presses[BUTTON_NEW_LOGFILE]++;}
 void  queue_button_press_SWITCH_VIS() { if (debounce_check(BUTTON_SWITCH_VIS )) presses[BUTTON_SWITCH_VIS]++;}
 
-
-
-
 void button_setup() {
   pinMode(PIN_A, INPUT);
   pinMode(PIN_B, INPUT);

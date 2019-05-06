@@ -32,7 +32,7 @@
  */
 
 //--------------General defines--------------------//
-#define publish_wait 10000
+#define publish_wait 10
 time_t last_published_data_request = publish_wait * (-1);
 
 #define MAX_INT 2147483647
@@ -60,10 +60,11 @@ PubSubClient client(espClient);
 int number_of_expected_messages = 0;
 //-------------------------------------------------//
 
-void connect_to_mqtt() {
+bool connect_to_mqtt() {
   client.setServer(mqttServer, mqttPort);
   WiFi.mode(WIFI_STA);
-  while (!client.connected()) {
+  int connection_tries = 0;
+  while ((!client.connected()) && (connection_tries < MAX_NUMBER_OF_CONNECTION_TRIES)) {
     digitalWrite(STATUS_LIGHT, HIGH);
     Serial.println("Connecting to MQTT...");
  
@@ -77,6 +78,15 @@ void connect_to_mqtt() {
       digitalWrite(STATUS_LIGHT, LOW);
       delay(2000);
     }
+    connection_tries++;
+  }
+
+  if ( client.connected() ) {
+    Serial.println("Connected to the MQTT server");
+    return true;
+  } else {
+    display_error("Cannot \nconnect \nto mqtt \nserver", f18b);
+    return false;
   }
 
   client.subscribe(data_response);
@@ -87,6 +97,7 @@ void connect_to_mqtt() {
 
 void message_callback(char* topic, byte* payload, unsigned int length) {
   char device = char(payload[0]);
+  Serial.println("Message");
   if (device == my_name) {
     String type = String(topic);
     
@@ -97,6 +108,7 @@ void message_callback(char* topic, byte* payload, unsigned int length) {
 
     } else if (type == "iobits/DataResponsePoints") {
       number_of_expected_messages = number_of_expected_messages - 1;
+      Serial.println("Message Received - waiting for " + String(number_of_expected_messages));
       data_response_message_points(payload, length, number_of_expected_messages);
 
     } else {
@@ -106,8 +118,9 @@ void message_callback(char* topic, byte* payload, unsigned int length) {
 }
 
 
-void request_data() {
-  time_t now;  
+bool request_data() {
+  time_t now;
+  int connection_tries = 0;
   do {
     digitalWrite(STATUS_LIGHT, HIGH);
     now = time(nullptr);
@@ -118,10 +131,18 @@ void request_data() {
       digitalWrite(STATUS_LIGHT, LOW);
       delay(110);
       last_published_data_request = now;
+      connection_tries++;
     }
     client.loop();
-  } while (number_of_expected_messages > 0);
-  Serial.println("DATA RECEIVED");
+  } while ((number_of_expected_messages > 0) && (connection_tries < MAX_NUMBER_OF_CONNECTION_TRIES));
+  if (number_of_expected_messages <= 0) {
+    Serial.println("DATA RECEIVED");
+    return true;
+  } else {
+    Serial.println("DATA WAS NOT RECEIVED");
+    display_error("Did not \nreceive \ndata", f18b);
+    return false;
+  }
 }
 
 

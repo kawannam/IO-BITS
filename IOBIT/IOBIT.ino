@@ -61,8 +61,7 @@
 #define DISPLAY_TYPE '1.5bw'
 
 //Internet credentials 
-const char* ssid = "****";
-const char* password = "*****";
+
 
 //Device specific char
 char my_name = 'A';
@@ -92,8 +91,9 @@ struct streaks {
 
 //--------------Public Constants and Defines-------//
 #define BUTTON_PIN_BITMASK 0x9700000000 // pins 32, 33, 34, 35, and 39 will wakeup the chip
-//#define STATUS_LIGHT 27
-#define STATUS_LIGHT 13
+#define STATUS_LIGHT 27
+#define MAX_NUMBER_OF_CONNECTION_TRIES 10
+//#define STATUS_LIGHT 13
 //-------------------------------------------------//
 
 //--------------Public Variables-------------------//
@@ -131,33 +131,47 @@ void setup() {
 
   //Connecting Networks
   Serial.println("Connecting Networks");
-  bool connected = connect_to_wifi();
   
-  if (connected) {
-    connect_to_mqtt();
-    
-    digitalWrite(STATUS_LIGHT, HIGH);
-    do {
-      Serial.println("RESPOND TO BUTTON PRESSES");
-      respond_to_button_press();
-    
-      //Request Data
-      Serial.println("REQUEST DATA");
-      request_data();
-
-      char buff[30];
-      for ( int i = 0; i < 100; i++) {
-        time_to_string(points[i].timestamp, buff);
-        Serial.println("Index: " + String(i) + " Button " + String(points[i].button) + " Time: " + buff);
-      }
-    
-      //Updating Display
-      Serial.println("Updating Display");
-      update_vis();
-      
-    } while (button_press_check());
+  if (!connect_to_wifi()) {
+    sleep();
+    return;
   }
-  //Enabling Wakeup
+  
+  if (!connect_to_mqtt()) {
+    sleep();
+    return;
+  }
+
+  
+  digitalWrite(STATUS_LIGHT, HIGH);
+  do {
+    Serial.println("RESPOND TO BUTTON PRESSES");
+    respond_to_button_press();
+  
+    //Request Data
+    Serial.println("REQUEST DATA");
+    if (!request_data()) {
+      sleep();
+      return;
+    }
+
+    char buff[30];
+    for ( int i = 0; i < 100; i++) {
+      time_to_string(points[i].timestamp, buff);
+      Serial.println("Index: " + String(i) + " Button " + String(points[i].button) + " Time: " + buff);
+    }
+  
+    //Updating Display
+    Serial.println("Updating Display");
+    update_vis();
+    
+  } while (button_press_check());
+  
+  sleep();
+}
+
+void sleep() {
+//Enabling Wakeup
   Serial.println("Enable Wakeup");
   esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK,ESP_EXT1_WAKEUP_ANY_HIGH);
 
