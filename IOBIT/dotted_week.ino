@@ -17,10 +17,14 @@ void dotted_week() {
   for(int i = 0; i < current_number_of_points; i++) {
     point_tm = points[i].timestamp;
     if (current_time_tm.tm_wday >= (current_time_tm.tm_yday - point_tm.tm_yday)) { 
-      if (points[i].button == 'A') colour = GxEPD_BLACK;
-      else colour = GxCOLOUR;
-      spot = dotted_week_get_spot(point_tm.tm_hour, point_tm.tm_wday); 
-      display.fillCircle(spot.x, spot.y, dot_rad, colour); 
+      spot = dotted_week_get_spot(point_tm.tm_hour, point_tm.tm_wday);
+      if (points[i].button == 'A') {
+        display.fillCircle(spot.x, spot.y, dot_rad, GxEPD_BLACK);
+        
+        //draw_plus(spot.x, spot.y, dot_rad, dot_rad);
+      } else {
+        draw_x(spot.x, spot.y, dot_rad, dot_rad);
+      }
     }
   }
 
@@ -28,12 +32,13 @@ void dotted_week() {
     for(int j = 0; j < DAYS_IN_A_WEEK; j++) {
       spot = dotted_week_get_spot(i, j);
       if ((i == current_time_tm.tm_hour) && (j == current_time_tm.tm_wday)) {
-        draw_plus(spot.x - dot_rad, spot.y - dot_rad, dot_diam + 1, dot_diam + 1);
-        //display.drawRect(spot.x - dot_rad, spot.y - dot_rad, dot_diam + 1, dot_diam + 1, GxEPD_BLACK);
+        //display.fillCircle(spot.x, spot.y, dot_rad, GxEPD_BLACK);
+        //draw_plus(spot.x - dot_rad, spot.y - dot_rad, dot_diam + 1, dot_diam + 1);
+        display.drawRect(spot.x - dot_rad-4, spot.y-1, dot_diam + 8, 2, GxEPD_BLACK);
       } /*else {
         display.drawCircle(spot.x, spot.y, dot_rad, GxEPD_BLACK);
       }*/
-      display.drawLine(spot.x, 0, spot.x, DISPLAY_HEIGHT, GxEPD_BLACK);
+      display.drawLine(spot.x, space_for_titles, spot.x, DISPLAY_HEIGHT, GxEPD_BLACK);
     }
     
   }

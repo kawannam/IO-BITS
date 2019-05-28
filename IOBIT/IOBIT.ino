@@ -61,10 +61,11 @@
 #define DISPLAY_TYPE '1.5bw'
 
 //Internet credentials 
-
+const char* ssid = "****";
+const char* password = "****";
 
 //Device specific char
-char my_name = 'A';
+char my_name = 'E';
 
 //Set Timezone - Currently set for MST
 const int timezone = -7 * 3600;
@@ -92,7 +93,10 @@ struct streaks {
 //--------------Public Constants and Defines-------//
 #define BUTTON_PIN_BITMASK 0x9700000000 // pins 32, 33, 34, 35, and 39 will wakeup the chip
 #define STATUS_LIGHT 27
-#define MAX_NUMBER_OF_CONNECTION_TRIES 10
+#define MAX_NUMBER_OF_CONNECTION_TRIES 5
+#define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
+#define TIME_TO_SLEEP  36000        /* Time ESP32 will go to sleep (in seconds) */
+
 //#define STATUS_LIGHT 13
 //-------------------------------------------------//
 
@@ -154,12 +158,6 @@ void setup() {
       sleep();
       return;
     }
-
-    char buff[30];
-    for ( int i = 0; i < 100; i++) {
-      time_to_string(points[i].timestamp, buff);
-      Serial.println("Index: " + String(i) + " Button " + String(points[i].button) + " Time: " + buff);
-    }
   
     //Updating Display
     Serial.println("Updating Display");
@@ -172,8 +170,11 @@ void setup() {
 
 void sleep() {
 //Enabling Wakeup
-  Serial.println("Enable Wakeup");
+  Serial.println("Enable Wakeup by button press");
   esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK,ESP_EXT1_WAKEUP_ANY_HIGH);
+
+  Serial.println("Enable Wakeup by timer");
+  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
 
    //Going to sleep now
   Serial.println("Going to sleep now");

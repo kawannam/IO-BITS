@@ -60,19 +60,11 @@ void get_streak(streaks *my_streaks, int days[3][MAX_NUMBER_OF_DAYS] ) {
     else is_B_streaking = false;
     index++;
   }
-
-  Serial.println("PRE A Streak: " + String(A_streak));
-  Serial.println("PRE B Streak: " + String(B_streak));
-  Serial.println("PRE Total Streak: " + String(streak));
    
   my_streaks->A = process_streak(A_streak, days[A_INDEX][0], days[A_INDEX][1]);
   my_streaks->B = process_streak(B_streak, days[B_INDEX][0], days[B_INDEX][1]);
   my_streaks->Total = process_streak(streak, days[BOTH_INDEX][0], days[BOTH_INDEX][1]);
 
-  Serial.println("A Streak: " + String(my_streaks->A));
-  Serial.println("B Streak: " + String(my_streaks->B));
-  Serial.println("Total Streak: " + String(my_streaks->Total));
-  
   return;
 }
 

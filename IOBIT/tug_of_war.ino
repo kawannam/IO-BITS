@@ -14,8 +14,6 @@ void tug_of_war() {
     const GFXfont* small_font = f9;
 
     count = count_A + count_B;
-
-    Serial.println("Count " + String(count));
     
       ratio_A = ((count_A * DISPLAY_WIDTH) / count);           
       display.fillScreen(GxEPD_WHITE);

@@ -97,7 +97,7 @@ const GFXfont* f36b = &FreeSansBold36pt7b;
 #define NUMBER_OF_VIS_OPTIONS 5
 
 char days[7] = {'U', 'M', 'T', 'W', 'R', 'F', 'S'};
-RTC_DATA_ATTR int vis_option = 0;
+RTC_DATA_ATTR int vis_option = 4;
 const int space_for_titles = 15;
 //-------------------------------------------------//
 
@@ -105,7 +105,7 @@ const int space_for_titles = 15;
 void setup_display() {
   display.init();
   if ((display_type == "1.54bwr") || (display_type == "1.5bwy")) {
-    display.setRotation(3);
+    display.setRotation(1);
   }
 }
 

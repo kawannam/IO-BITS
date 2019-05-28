@@ -26,10 +26,9 @@ void plain_text() {
 }
 
 String get_last_instance_timestamp(char button) {
-  Serial.println("Number of points: " + current_number_of_points);
   
   char buff[30];
-  for (int i = current_number_of_points; i >= 0; i--) {
+  for (int i = 0; i < current_number_of_points; i++) {
     time_to_string(points[i].timestamp, buff);
     if (points[i].button == button) {
       time_to_string_display(points[i].timestamp, buff);

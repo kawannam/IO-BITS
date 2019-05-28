@@ -22,8 +22,7 @@ void stacked_bars() {
   for (int i = 1; i < current_number_of_points; i = i+2) {
     start_time = points[i-1].timestamp;
     end_time = points[i].timestamp;
-
-    if (current_time_tm.tm_wday >= (start_time.tm_yday - end_time.tm_yday)) {
+    if (int(current_time_tm.tm_wday) > (int(end_time.tm_yday) - int(start_time.tm_yday))) {
       draw_time_interval(start_time, end_time);
     }
   }
@@ -50,7 +49,6 @@ void stacked_bars() {
     display.setCursor(0,y);
     display.print(i);
   }
-
 }
 
 

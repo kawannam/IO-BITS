@@ -14,9 +14,13 @@ void streaks_and_valleys() {
 
     struct streaks my_streaks;
     int days[3][MAX_NUMBER_OF_DAYS];
-
     
     get_streak(&my_streaks, days);
+
+    int space_for_today = 0;
+    if (!(days[A_INDEX][0] > 0 || days[B_INDEX][0] > 0)) {
+      space_for_today =  2*LINE_WIDTH;
+    }
 
     streak = my_streaks.Total;
 
@@ -33,22 +37,17 @@ void streaks_and_valleys() {
     else {
       int line_height = 0;
       int line_height_offset = 0;
-      for (int i = 0; i < streak; i++) {
-            line_height_offset = DISPLAY_HEIGHT - ((streak-i-1)*2*LINE_WIDTH);
-            
-            
-        for (int j = 0; j < LINE_WIDTH; j++)  {
-          line_height = line_height_offset - j;          
-          if (days[A_INDEX][i] > 0 && days[B_INDEX][i] > 0) {
-            display.drawLine(0, line_height, DISPLAY_WIDTH, line_height, GxEPD_BLACK);
-          } else if (days[A_INDEX][i] > 0) {
-            for (int k = 0; k < DISPLAY_WIDTH; k += (LINE_WIDTH*2)) {
-              display.drawLine(k, line_height, k+LINE_WIDTH, line_height, GxEPD_BLACK);
-            }
-          } else if (days[B_INDEX][i] > 0) {
-            for (int k = 0; k < DISPLAY_WIDTH; k += (LINE_WIDTH*3)) {
-              display.drawLine(k, line_height, k+(2*LINE_WIDTH), line_height, GxEPD_BLACK);
-            }
+      for (int i = 0; i <= streak+1; i++) {
+        line_height_offset = DISPLAY_HEIGHT - ((streak-i-1)*2*LINE_WIDTH) - space_for_today;
+        if (days[A_INDEX][i] > 0 && days[B_INDEX][i] > 0) {
+          display.fillRect(0, line_height_offset - LINE_WIDTH, DISPLAY_WIDTH, LINE_WIDTH, GxEPD_BLACK);
+        } else if (days[A_INDEX][i] > 0) {
+          for (int k = 0; k < DISPLAY_WIDTH; k += (LINE_WIDTH*2)) {
+            display.fillRect(k, line_height_offset - LINE_WIDTH, LINE_WIDTH, LINE_WIDTH, GxEPD_BLACK);
+          }
+        } else if (days[B_INDEX][i] > 0) {
+          for (int k = 0; k < DISPLAY_WIDTH; k += (LINE_WIDTH*3)) {
+            display.fillRect(k, line_height_offset - LINE_WIDTH, (2*LINE_WIDTH), LINE_WIDTH, GxEPD_BLACK);
           }
         }
       }

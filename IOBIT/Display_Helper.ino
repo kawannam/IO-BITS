@@ -19,12 +19,27 @@ void get_text_dimensions(String string_to_display, const GFXfont* font, uint16_t
 }
 
 void draw_x(int x, int y, int w, int h) {
-  display.drawLine(x, y, x+w, y+h, GxEPD_BLACK);
-  display.drawLine(x, y+h, x+w, y, GxEPD_BLACK);
+  //w += 1;
+  //h += 1;
+  display.drawLine(x-w, y-h-1, x+w, y+h-1, GxEPD_BLACK);
+  display.drawLine(x-w, y-h, x+w, y+h, GxEPD_BLACK);
+  display.drawLine(x-w, y-h+1, x+w, y+h+1, GxEPD_BLACK);
+  
+  display.drawLine(x-w, y+h-1, x+w, y-h-1, GxEPD_BLACK);
+  display.drawLine(x-w, y+h, x+w, y-h, GxEPD_BLACK);
+  display.drawLine(x-w, y+h+1, x+w, y-h+1, GxEPD_BLACK);
 }
 
 void draw_plus(int x, int y, int w, int h) {
-  display.drawLine(x, y + (h/2), x+w, y+(h/2), GxEPD_BLACK);
-  display.drawLine(x+(w/2), y, x+(w/2), y+h, GxEPD_BLACK);
+  w += 2;
+  h += 2;
+
+  display.drawLine(x-w, y-1, x+w, y-1, GxEPD_BLACK);
+  display.drawLine(x-w, y, x+w, y, GxEPD_BLACK);
+  display.drawLine(x-w, y+1, x+w, y+1, GxEPD_BLACK);
+  
+  display.drawLine(x-1, y-h, x-1, y+h, GxEPD_BLACK);
+  display.drawLine(x, y-h, x, y+h, GxEPD_BLACK);
+  display.drawLine(x+1, y-h, x+1, y+h, GxEPD_BLACK);
 }
 

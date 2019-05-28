@@ -83,7 +83,11 @@ void detect_wakeup_reason() {
       queue_button_press(esp_sleep_get_ext1_wakeup_status());
       break;
     }
-    case 3  : Serial.println("Wakeup caused by timer"); break;
+    case 3  : {
+      Serial.println("Wakeup caused by timer"); 
+
+      break;
+    }
     case 4  : Serial.println("Wakeup caused by touchpad"); break;
     case 5  : Serial.println("Wakeup caused by ULP program"); break;
     default : Serial.println("Wakeup was not caused by deep sleep"); break;
@@ -107,16 +111,13 @@ void queue_button_press(uint64_t wakeup_pin_mask) {
 
 
 void respond_to_button_press() {
-  Serial.println("A | B | U | N | S |");
   for (int i = 0; i < NUMBER_OF_BUTTONS; i++) {
-    Serial.print(String(presses[i]) + " | ");
     while (presses[i] > 0) {
       presses[i]--;
       notify_button_press(BUTTONS[i]);
       if (BUTTON_SWITCH_VIS == i) switch_visualization();
     }
   }
-  Serial.println();
 }
 
 

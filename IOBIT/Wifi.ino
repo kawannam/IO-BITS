@@ -12,7 +12,7 @@
 bool connect_to_wifi() {
   WiFi.begin(ssid, password);
   int connection_tries = 0;
-  while (WiFi.status() != WL_CONNECTED && (connection_tries < MAX_NUMBER_OF_CONNECTION_TRIES)) {
+  while (WiFi.status() != WL_CONNECTED && (connection_tries < (MAX_NUMBER_OF_CONNECTION_TRIES*5))) {
     digitalWrite(STATUS_LIGHT, HIGH);
     delay(500);
     Serial.println("Connecting to WiFi..");

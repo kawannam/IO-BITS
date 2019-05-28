@@ -40,7 +40,7 @@ time_t last_published_data_request = publish_wait * (-1);
 
 //--------------MQTT Consts------------------------//
 const char* device_id = "IOBITClient" + my_name;
-const char* mqttServer = "test.mosquitto.org";
+const char* mqttServer = "192.168.4.1";
 const int mqttPort = 1883;
 //-------------------------------------------------//
 
@@ -82,33 +82,29 @@ bool connect_to_mqtt() {
   }
 
   if ( client.connected() ) {
+    client.subscribe(data_response);
+    client.subscribe(data_response_points);
+    client.setCallback(message_callback);
     Serial.println("Connected to the MQTT server");
     return true;
   } else {
     display_error("Cannot \nconnect \nto mqtt \nserver", f18b);
     return false;
   }
-
-  client.subscribe(data_response);
-  client.subscribe(data_response_points);
-  client.setCallback(message_callback);
 }
 
 
 void message_callback(char* topic, byte* payload, unsigned int length) {
   char device = char(payload[0]);
-  Serial.println("Message");
   if (device == my_name) {
     String type = String(topic);
     
     if (type ==  "iobits/DataResponse") {
       Serial.println("DataResponse recieved, length: " + String(length));
       number_of_expected_messages = data_message(payload, length);
-      Serial.println("Expected Updated to: " + String(number_of_expected_messages));
 
     } else if (type == "iobits/DataResponsePoints") {
       number_of_expected_messages = number_of_expected_messages - 1;
-      Serial.println("Message Received - waiting for " + String(number_of_expected_messages));
       data_response_message_points(payload, length, number_of_expected_messages);
 
     } else {
