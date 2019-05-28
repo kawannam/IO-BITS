@@ -96,12 +96,11 @@ class EventHandler:
         print("UNDO REQUEST")
         try:
             fields = message.split(",")
-            with open("DATA/{}.csv".format(fields[0]), "r+") as file:
+            lines=[]
+            with open("DATA/{}.csv".format(fields[0]), "r") as file:
                 lines = file.readlines()
-                last_line = lines[-1].split(",")
-                lines = lines[:-1]
-                file.truncate(0)
-                file.writelines([item for item in lines])
+            with open("DATA/{}.csv".format(fields[0]), "w") as file:
+                file.writelines([item for item in lines[:-1]])
         except FileExistsError:
             print("File was not restarted correctly")
 
